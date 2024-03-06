@@ -67,12 +67,12 @@ void MyMethods::Sigmoid28() {
 	Alpha[7] = 0.7853981634;
 	Alpha[8] = 0.8835729338;
 	Alpha[9] = 0.9817477042;
-
+	
+	double* zeros = new double[slots]();
 	Ciphertext ctres;
 	ctres = scheme.encrypt(zeros, slots, logp, logQ);
 
 	Ciphertext *ctresult = new Ciphertext[10];
-	double* zeros = new double[slots]();
 	NTL_EXEC_RANGE(10, first, last);
 	for (long i = first; i < last; ++i) {
 		ctresult[i] = scheme.encrypt(zeros, slots, logp, logQ);
