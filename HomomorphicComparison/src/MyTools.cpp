@@ -557,13 +557,13 @@ i[exp(ix) - exp(-ix)] = -2sinx
 exp(ix) + exp(-ix) = 2cosx
 .5[exp(ix) + exp(-ix)] = cosx
 */
-Ciphertext MyTools::Sine(Scheme& scheme, Ciphertext& cipher1, long t, long logp) {
-	auto ct = scheme.multByConst(cipher1, 1. / pow(2, t), logp);
+Ciphertext MyTools::Sine(Scheme& scheme, Ciphertext& cipher1, double alpha, long t, long logp) {
+	auto ct = scheme.multByConst(cipher1, alpha*1. / pow(2, t), logp);
 	ct.reScaleByAndEqual(logp);
 	scheme.imultAndEqual(ct);
 	auto nect = ct.negate();
 
-//y = 0.991576 + 0.99636 .*x + 0.550876 .*x.^2 + 0.178834 .*x.^3 ;
+
 	auto ct1 = ct;
 	auto ct2 = scheme.mult(ct1, ct1);
 	ct2.reScaleByAndEqual(logp);
@@ -574,10 +574,7 @@ Ciphertext MyTools::Sine(Scheme& scheme, Ciphertext& cipher1, long t, long logp)
 	ct3 = scheme.multByConst(ct3, 1./6, logp);
 	ct3.reScaleByAndEqual(logp);
 	ct1.modDownToAndEqual(ct3.logq);
-// cout << "ct0.logq = " << ct0.logq  << "ct0.logp = " << ct0.logp << endl;
-	cout << "ct1.logq = " << ct1.logq << "\t\tct1.logp = " << ct1.logp << endl;
-	cout << "ct2.logq = " << ct2.logq << "\t\tct2.logp = " << ct2.logp << endl;
-	cout << "ct3.logq = " << ct3.logq << "\t\tct3.logp = " << ct3.logp << endl;
+
 	scheme.addAndEqual(ct1, ct2);
 	scheme.addAndEqual(ct1, ct3);
 	auto ctexp1 = scheme.addConst(ct1, 1);
@@ -597,10 +594,7 @@ Ciphertext MyTools::Sine(Scheme& scheme, Ciphertext& cipher1, long t, long logp)
 	ct33 = scheme.multByConst(ct33, 1./6, logp);
 	ct33.reScaleByAndEqual(logp);
 	ct11.modDownToAndEqual(ct33.logq);
-// cout << "ct0.logq = " << ct0.logq  << "ct0.logp = " << ct0.logp << endl;
-	cout << "ct1.logq = " << ct1.logq << "\t\tct1.logp = " << ct1.logp << endl;
-	cout << "ct2.logq = " << ct2.logq << "\t\tct2.logp = " << ct2.logp << endl;
-	cout << "ct3.logq = " << ct3.logq << "\t\tct3.logp = " << ct3.logp << endl;
+
 	scheme.addAndEqual(ct11, ct22);
 	scheme.addAndEqual(ct11, ct33);
 	auto ctexp11 = scheme.addConst(ct11, 1);
@@ -615,9 +609,6 @@ Ciphertext MyTools::Sine(Scheme& scheme, Ciphertext& cipher1, long t, long logp)
 	ctres.reScaleByAndEqual(logp);
 
 	scheme.imultAndEqual(ctres);
-
-
-
 
 
 return ctres;

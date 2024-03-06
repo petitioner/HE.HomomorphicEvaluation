@@ -73,8 +73,8 @@ public:
 	static size_t getPeakRSS( );
 	static size_t getCurrentRSS( );
 
-static Ciphertext Sine(Scheme& scheme, Ciphertext& ctx, long t, long logp = 20); 
-static Ciphertext Cosine(Ciphertext& ctx, long t); 
+static Ciphertext Sine(Scheme& scheme, Ciphertext& ctx, double alpha, long t, long logp); 
+static Ciphertext Cosine(Scheme& scheme, Ciphertext& ctx, double alpha, long t, long logp); 
 
 };
 
