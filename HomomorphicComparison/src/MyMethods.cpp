@@ -41,6 +41,9 @@ long logp = 30;
 long logSlots = 6;
 long slots = (1 << logSlots);
 
+//void TestScheme::testBasic(long logN, long logQ, long logp, long logSlots) {
+	cout << "!!! START TEST BASIC !!!" << endl;
+	//-----------------------------------------
 	TimeUtils timeutils;
 	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, logN, logQ);
@@ -50,7 +53,9 @@ long slots = (1 << logSlots);
 	srand(time(NULL));
 	//-----------------------------------------
 
+	logSlots = 6;
 
+	long slots = (1 << logSlots);
 	auto mvec1 = EvaluatorUtils::randomRealArray(slots);
 
 	cout << endl << endl << "Test cosx form exp(ix)" << endl;
@@ -119,9 +124,63 @@ long slots = (1 << logSlots);
 	Ciphertext cipher1 = scheme.encrypt(mvec1, slots, logp, logQ);
 	timeutils.stop("Encrypt two batch");
 
+	auto ct = scheme.multByConst(cipher1, 1. / 256, logp);
+	ct.reScaleByAndEqual(logp);
+	scheme.imultAndEqual(ct);
+	auto nect = ct.negate();
 
-auto ctres = MyTools::Sine(scheme, cipher1, 6); 
+//y = 0.991576 + 0.99636 .*x + 0.550876 .*x.^2 + 0.178834 .*x.^3 ;
+	auto ct1 = ct;
+	auto ct2 = scheme.mult(ct1, ct1);
+	ct2.reScaleByAndEqual(logp);
+	auto ct3 = scheme.mult(ct1, ct2);
+	ct3.reScaleByAndEqual(logp);
+	ct2 = scheme.multByConst(ct2, 0.5, logp);
+	ct2.reScaleByAndEqual(logp);
+	ct3 = scheme.multByConst(ct3, 1./6, logp);
+	ct3.reScaleByAndEqual(logp);
+	ct1.modDownToAndEqual(ct3.logq);
+// cout << "ct0.logq = " << ct0.logq  << "ct0.logp = " << ct0.logp << endl;
+	cout << "ct1.logq = " << ct1.logq << "\t\tct1.logp = " << ct1.logp << endl;
+	cout << "ct2.logq = " << ct2.logq << "\t\tct2.logp = " << ct2.logp << endl;
+	cout << "ct3.logq = " << ct3.logq << "\t\tct3.logp = " << ct3.logp << endl;
+	scheme.addAndEqual(ct1, ct2);
+	scheme.addAndEqual(ct1, ct3);
+	auto ctexp1 = scheme.addConst(ct1, 1);
+	long logpp = ctexp1.logp;
+	for (long i = 0; i < 8; ++i) {
+		ctexp1 = scheme.mult(ctexp1, ctexp1);
+		ctexp1.reScaleByAndEqual(logpp);
+	}
 
+	auto ct11 = nect;
+	auto ct22 = scheme.mult(ct11, ct11);
+	ct22.reScaleByAndEqual(logp);
+	auto ct33 = scheme.mult(ct11, ct22);
+	ct33.reScaleByAndEqual(logp);
+	ct22 = scheme.multByConst(ct22, 0.5, logp);
+	ct22.reScaleByAndEqual(logp);
+	ct33 = scheme.multByConst(ct33, 1./6, logp);
+	ct33.reScaleByAndEqual(logp);
+	ct11.modDownToAndEqual(ct33.logq);
+// cout << "ct0.logq = " << ct0.logq  << "ct0.logp = " << ct0.logp << endl;
+	cout << "ct1.logq = " << ct1.logq << "\t\tct1.logp = " << ct1.logp << endl;
+	cout << "ct2.logq = " << ct2.logq << "\t\tct2.logp = " << ct2.logp << endl;
+	cout << "ct3.logq = " << ct3.logq << "\t\tct3.logp = " << ct3.logp << endl;
+	scheme.addAndEqual(ct11, ct22);
+	scheme.addAndEqual(ct11, ct33);
+	auto ctexp11 = scheme.addConst(ct11, 1);
+	logpp = ctexp11.logp;
+	for (long i = 0; i < 8; ++i) {
+		ctexp11 = scheme.mult(ctexp11, ctexp11);
+		ctexp11.reScaleByAndEqual(logpp);
+	}
+
+	auto ctres = scheme.sub(ctexp1, ctexp11);
+	ctres = scheme.multByConst(ctres, -0.5, logp);
+	ctres.reScaleByAndEqual(logp);
+
+	scheme.imultAndEqual(ctres);
 
 	timeutils.start("Decrypt batch");
 	auto dvec1 = scheme.decrypt(secretKey, ctres);
