@@ -32,7 +32,7 @@ void MyMethods::Sigmoid28() {
 
 	long logN = 13;
 	long logQ = 1200;
-	long logp = 30;
+	long logp = 20;
 	long logSlots = 9;
 	long slots = (1 << logSlots);
 
@@ -70,7 +70,7 @@ void MyMethods::Sigmoid28() {
 	
 	double* zeros = new double[slots]();
 	Ciphertext ctres;
-	ctres = scheme.encrypt(zeros, slots, logp, logQ);
+
 
 	Ciphertext *ctresult = new Ciphertext[10];
 	NTL_EXEC_RANGE(10, first, last);
@@ -81,7 +81,7 @@ void MyMethods::Sigmoid28() {
 
 	auto mvec1 = EvaluatorUtils::randomRealArray(slots);
 
-	long t = 5;
+	long t = 4;
 	for (long i = 0; i < slots; ++i)
 		mvec1[i] = -28 + 0.1 * i;
 
@@ -98,8 +98,8 @@ void MyMethods::Sigmoid28() {
 	}
 	NTL_EXEC_RANGE_END
 
-	ctres.reScaleToAndEqual(ctresult[0].logp);
-	ctres.modDownToAndEqual(ctresult[0].logq);
+
+	ctres = scheme.encrypt(zeros, slots, ctresult[0].logp, ctresult[0].logq);
 	for (long i = 0; i < 10; ++i) {
 
 		scheme.addAndEqual(ctres, ctresult[i]);
@@ -108,18 +108,25 @@ void MyMethods::Sigmoid28() {
 
 	timeutils.start("Decrypt batch");
 	auto dvec1 = scheme.decrypt(secretKey, ctres);
+	//auto dvec1 = scheme.decrypt(secretKey, ctres);
 	timeutils.stop("Decrypt batch");
 
 	auto mvec2 = EvaluatorUtils::randomRealArray(slots);
 	cout << "mvec1[i]" << "\t\t" << "sin(mvec1[i])" << "\t\t" << "dvec1[i]"
 			<< endl;
 	for (long i = 0; i < slots; ++i) {
-		cout << mvec1[i] << "\t\t" << sin(mvec1[i]) << "\t\t" << dvec1[i]
+		cout << mvec1[i] << "\t\t" << 1./(1 + exp(-mvec1[i]))-0.5 << "\t\t" << dvec1[i]
 				<< endl;
 		mvec2[i] = sin(mvec1[i]);
 	}
 
-	StringUtils::showcompare(mvec2, dvec1, slots, "sin");
+	//StringUtils::showcompare(mvec2, dvec1, slots, "sin");
+
+	cout << endl << endl << "For Octave printing: " << endl << endl << "x = [";
+	for (long i = 0; i < slots; ++i) {
+		cout <<  dvec1[i] << ",\t"  ;
+	}
+	cout << "];plot(x)" << endl << endl << endl;
 
 }
 
