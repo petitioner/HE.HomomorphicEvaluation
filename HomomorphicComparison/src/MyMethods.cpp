@@ -53,9 +53,7 @@ long slots = (1 << logSlots);
 	srand(time(NULL));
 	//-----------------------------------------
 
-	logSlots = 6;
 
-	long slots = (1 << logSlots);
 	auto mvec1 = EvaluatorUtils::randomRealArray(slots);
 
 	cout << endl << endl << "Test cosx form exp(ix)" << endl;
