@@ -35,6 +35,9 @@ using namespace NTL;
 void MyMethods::testSine(){
 	cout << "!!! START TEST BASIC !!!" << endl;
 	//-----------------------------------------
+long logN = 13;
+long logQ = 1200;
+long logp = 30;
 	TimeUtils timeutils;
 	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, logN, logQ);
