@@ -38,6 +38,9 @@ void MyMethods::testSine(){
 long logN = 13;
 long logQ = 1200;
 long logp = 30;
+long logSlots = 6;
+long slots = (1 << logSlots);
+
 	TimeUtils timeutils;
 	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, logN, logQ);
@@ -47,9 +50,7 @@ long logp = 30;
 	srand(time(NULL));
 	//-----------------------------------------
 
-	logSlots = 6;
 
-	long slots = (1 << logSlots);
 	auto mvec1 = EvaluatorUtils::randomRealArray(slots);
 
 	cout << endl << endl << "Test cosx form exp(ix)" << endl;
