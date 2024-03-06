@@ -69,13 +69,13 @@ void MyMethods::Sigmoid28() {
 	Alpha[9] = 0.9817477042;
 
 	Ciphertext ctres;
-	scheme.encryptSingle(ctres, 0.0, logp, logQ);
-	ctres.slots = slots;
+	ctres = scheme.encrypt(zeros, slots, logp, logQ);
+
 	Ciphertext *ctresult = new Ciphertext[10];
+	double* zeros = new double[slots]();
 	NTL_EXEC_RANGE(10, first, last);
 	for (long i = first; i < last; ++i) {
-		scheme.encryptSingle(ctresult[i], 0.0, logp, logQ);
-		ctresult[i].n = slots;
+		ctresult[i] = scheme.encrypt(zeros, slots, logp, logQ);
 	}
 	NTL_EXEC_RANGE_END
 
