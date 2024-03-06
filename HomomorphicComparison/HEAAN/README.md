@@ -1,3 +1,8 @@
+# How to compile it: 
+		step 0: install m4, gmp and NTL
+  		step 1: go to HEAAN/HEAAN/lib  and [make all] (perhaps need to [make clean] first)
+    		step 2: go to HEAAN/HEAAN/run and [make] using the libHEAAN.a generated from step 1.
+
 # HEAAN
 HEAAN is software library that implements homomorphic encryption (HE) that supports fixed point arithmetics.
 This library supports approximate operations between rational numbers.
