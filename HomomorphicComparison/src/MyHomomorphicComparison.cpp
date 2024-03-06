@@ -17,7 +17,8 @@ int main(int argc, char **argv) {
 	SetNumThreads(8);
 
 
-		MyMethods::Sigmoid28();
+		//MyMethods::Sigmoid28();
+		MyMethods::Sigmoid100();
 	
 	
 

@@ -564,19 +564,24 @@ Ciphertext MyTools::Sine(Scheme& scheme, Ciphertext& cipher1, double alpha, long
 	auto nect = ct.negate();
 
 
-	auto ct1 = ct;
-	auto ct2 = scheme.mult(ct1, ct1);
+	auto ct1 = ct;                    // logp  logq
+	auto ct2 = scheme.mult(ct1, ct1); // 2logp logq
+	auto ct3 = scheme.mult(ct1, ct2); // 3logp logq
+	auto ct4 = scheme.mult(ct1, ct3); // 4logp logq
+	ct2 = scheme.multByConst(ct2, 0.5, logp);  // 3logp logq	
+	ct3 = scheme.multByConst(ct3, 1./6, logp); // 4logp logq
+	ct4 = scheme.multByConst(ct4, 1./24, logp);// 5logp logq
+	ct4.reScaleByAndEqual(logp);		   // 4logp logq
+	ct3.modDownToAndEqual(ct4.logq);  // 4logp logq-logp
+	scheme.addAndEqual(ct3, ct4);
+	ct3.reScaleByAndEqual(logp);	// 3logp logq-2logp
+	ct2.modDownToAndEqual(ct3.logq); // 3logp logq-2logp
+	scheme.addAndEqual(ct2, ct3);
 	ct2.reScaleByAndEqual(logp);
-	auto ct3 = scheme.mult(ct1, ct2);
-	ct3.reScaleByAndEqual(logp);
-	ct2 = scheme.multByConst(ct2, 0.5, logp);
 	ct2.reScaleByAndEqual(logp);
-	ct3 = scheme.multByConst(ct3, 1./6, logp);
-	ct3.reScaleByAndEqual(logp);
-	ct1.modDownToAndEqual(ct3.logq);
+	ct1.modDownToAndEqual(ct2.logq);
 
 	scheme.addAndEqual(ct1, ct2);
-	scheme.addAndEqual(ct1, ct3);
 	auto ctexp1 = scheme.addConst(ct1, 1);
 	long logpp = ctexp1.logp;
 	for (long i = 0; i < t; ++i) {
@@ -585,18 +590,23 @@ Ciphertext MyTools::Sine(Scheme& scheme, Ciphertext& cipher1, double alpha, long
 	}
 
 	auto ct11 = nect;
-	auto ct22 = scheme.mult(ct11, ct11);
+	auto ct22 = scheme.mult(ct11, ct11); // 2logp logq
+	auto ct33 = scheme.mult(ct11, ct22); // 3logp logq
+	auto ct44 = scheme.mult(ct11, ct33); // 4logp logq
+	ct22 = scheme.multByConst(ct22, 0.5, logp);  // 3logp logq	
+	ct33 = scheme.multByConst(ct33, 1./6, logp); // 4logp logq
+	ct44 = scheme.multByConst(ct44, 1./24, logp);// 5logp logq
+	ct44.reScaleByAndEqual(logp);		   // 4logp logq
+	ct33.modDownToAndEqual(ct44.logq);  // 4logp logq-logp
+	scheme.addAndEqual(ct33, ct44);
+	ct33.reScaleByAndEqual(logp);	// 3logp logq-2logp
+	ct22.modDownToAndEqual(ct33.logq); // 3logp logq-2logp
+	scheme.addAndEqual(ct22, ct33);
 	ct22.reScaleByAndEqual(logp);
-	auto ct33 = scheme.mult(ct11, ct22);
-	ct33.reScaleByAndEqual(logp);
-	ct22 = scheme.multByConst(ct22, 0.5, logp);
 	ct22.reScaleByAndEqual(logp);
-	ct33 = scheme.multByConst(ct33, 1./6, logp);
-	ct33.reScaleByAndEqual(logp);
-	ct11.modDownToAndEqual(ct33.logq);
+	ct11.modDownToAndEqual(ct22.logq);
 
 	scheme.addAndEqual(ct11, ct22);
-	scheme.addAndEqual(ct11, ct33);
 	auto ctexp11 = scheme.addConst(ct11, 1);
 	logpp = ctexp11.logp;
 	for (long i = 0; i < t; ++i) {
