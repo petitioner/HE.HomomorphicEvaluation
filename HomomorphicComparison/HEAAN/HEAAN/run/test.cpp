@@ -17,7 +17,7 @@
 
 /* To Consist With the IDASH2017, There Should Be Only One main() Function. */
 /*              The error is : multiple definition of `main';               */
-int main(int argc, char **argv) {
+int mmmmmmain(int argc, char **argv) {
 
 
 
