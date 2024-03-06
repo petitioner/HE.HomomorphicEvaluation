@@ -56,48 +56,6 @@ long slots = (1 << logSlots);
 
 	auto mvec1 = EvaluatorUtils::randomRealArray(slots);
 
-	cout << endl << endl << "Test cosx form exp(ix)" << endl;
-	for (long i = 0; i < slots; ++i) {
-		std::complex<double> z1(mvec1[i], 0.0);
-		std::complex<double> z2(0, 1);
-		auto ix = z1 * z2;
-		std::complex<double> e1(1, 0);
-		std::complex<double> e2(.5, 0);
-		std::complex<double> e3(1.0 / 6, 0);
-		auto expix = e1 + ix + e2 * ix * ix + e3 * ix * ix * ix;
-
-		std::complex<double> z11(-mvec1[i], 0.0);
-		std::complex<double> z22(0, 1);
-		auto nix = z11 * z22;
-		auto expnix = e1 + nix + e2 * nix * nix + e3 * nix * nix * nix;
-
-		cout << e2 * (expix + expnix) << " = = " << cos(mvec1[i]) << endl;
-
-	}
-
-	cout << endl << endl << "Test sinx form exp(ix)" << endl;
-	for (long i = 0; i < slots; ++i) {
-		std::complex<double> z1(mvec1[i], 0.0);
-		std::complex<double> z2(0, 1);
-		auto ix = z1 * z2;
-		std::complex<double> e1(1, 0);
-		std::complex<double> e2(.5, 0);
-		std::complex<double> e3(1.0 / 6, 0);
-		std::complex<double> e4(1.0 / 24, 0);
-		auto expix = e1 + ix + e2 * ix * ix + e3 * ix * ix * ix
-				+ e4 * ix * ix * ix * ix;
-
-		std::complex<double> z11(mvec1[i], 0.0);
-		std::complex<double> z22(0, 1);
-		auto nix = -z11 * z22;
-		auto expnix = e1 + nix + e2 * nix * nix + e3 * nix * nix * nix
-				+ e4 * nix * nix * nix * nix;
-
-		cout << -e2 * z2 * (expix - expnix) << " = = " << sin(mvec1[i]) << endl;
-
-	}
-
-	cout << "SDF" << endl;
 
 	/*
 	 exp(ix) = cosx + isinx
@@ -113,7 +71,7 @@ long slots = (1 << logSlots);
 	 exp(ix) + exp(-ix) = 2cosx
 	 .5[exp(ix) + exp(-ix)] = cosx
 	 */
-
+long t = 8;
 	for (long i = 0; i < slots; ++i)
 		mvec1[i] = 22 * mvec1[i];
 //for (long i=0; i<slots; ++i) mvec1[i] = 52*mvec1[i];
@@ -122,7 +80,13 @@ long slots = (1 << logSlots);
 	Ciphertext cipher1 = scheme.encrypt(mvec1, slots, logp, logQ);
 	timeutils.stop("Encrypt two batch");
 
-	auto ct = scheme.multByConst(cipher1, 1. / 256, logp);
+
+
+
+
+//auto ctres = MyTools::Sine(scheme, cipher1, t, 20);
+
+	auto ct = scheme.multByConst(cipher1, 1. / pow(2, t), logp);
 	ct.reScaleByAndEqual(logp);
 	scheme.imultAndEqual(ct);
 	auto nect = ct.negate();
@@ -146,7 +110,7 @@ long slots = (1 << logSlots);
 	scheme.addAndEqual(ct1, ct3);
 	auto ctexp1 = scheme.addConst(ct1, 1);
 	long logpp = ctexp1.logp;
-	for (long i = 0; i < 8; ++i) {
+	for (long i = 0; i < t; ++i) {
 		ctexp1 = scheme.mult(ctexp1, ctexp1);
 		ctexp1.reScaleByAndEqual(logpp);
 	}
@@ -169,7 +133,7 @@ long slots = (1 << logSlots);
 	scheme.addAndEqual(ct11, ct33);
 	auto ctexp11 = scheme.addConst(ct11, 1);
 	logpp = ctexp11.logp;
-	for (long i = 0; i < 8; ++i) {
+	for (long i = 0; i < t; ++i) {
 		ctexp11 = scheme.mult(ctexp11, ctexp11);
 		ctexp11.reScaleByAndEqual(logpp);
 	}
@@ -179,6 +143,10 @@ long slots = (1 << logSlots);
 	ctres.reScaleByAndEqual(logp);
 
 	scheme.imultAndEqual(ctres);
+
+
+
+
 
 	timeutils.start("Decrypt batch");
 	auto dvec1 = scheme.decrypt(secretKey, ctres);
