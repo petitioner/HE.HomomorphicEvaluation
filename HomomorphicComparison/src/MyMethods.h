@@ -5,6 +5,7 @@
 
 class MyMethods {
 public:
+
 	static void testSine();
 
 	static void Sigmoid28();

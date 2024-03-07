@@ -48,6 +48,7 @@ using namespace std;
 
 class MyTools {
 
+
 public:
 
 	static long suggestLogN(long lambda, long logQ);

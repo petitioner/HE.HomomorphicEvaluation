@@ -559,6 +559,7 @@ exp(ix) + exp(-ix) = 2cosx
 */
 Ciphertext MyTools::Sine(Scheme& scheme, Ciphertext& cipher1, double alpha, long t, long logp) {
 
+
 	auto ct = scheme.multByConst(cipher1, alpha*1. / pow(2, t), logp);
 	//ct.reScaleByAndEqual(logp);
 	scheme.imultAndEqual(ct);
