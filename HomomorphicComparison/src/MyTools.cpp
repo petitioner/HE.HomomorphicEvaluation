@@ -559,21 +559,25 @@ exp(ix) + exp(-ix) = 2cosx
 */
 Ciphertext MyTools::Sine(Scheme& scheme, Ciphertext& cipher1, double alpha, long t, long logp) {
 	auto ct = scheme.multByConst(cipher1, alpha*1. / pow(2, t), logp);
-	ct.reScaleByAndEqual(logp);
+	//ct.reScaleByAndEqual(logp);
 	scheme.imultAndEqual(ct);
 	auto nect = ct.negate();
 
 
 	auto ct1 = ct;
 	auto ct2 = scheme.mult(ct1, ct1);
-	ct2.reScaleByAndEqual(logp);
+	//ct2.reScaleByAndEqual(logp);
 	auto ct3 = scheme.mult(ct1, ct2);
-	ct3.reScaleByAndEqual(logp);
-	ct2 = scheme.multByConst(ct2, 0.5, logp);
-	ct2.reScaleByAndEqual(logp);
+	//ct3.reScaleByAndEqual(logp);
 	ct3 = scheme.multByConst(ct3, 1./6, logp);
-	ct3.reScaleByAndEqual(logp);
-	ct1.modDownToAndEqual(ct3.logq);
+	//ct3.reScaleByAndEqual(logp);
+	ct2 = scheme.multByConst(ct2, 0.5, ct3.logp-ct2.logp);
+	//ct2.reScaleByAndEqual(logp);
+	ct1 = scheme.multByConst(ct1, 1.0, ct3.logp-ct1.logp);
+	
+	//ct3.modDownToAndEqual(ct1.logq);
+cout << ct1.logp << "\t\t:\t\t" << ct2.logp << "\t\t:\t\t" << ct3.logp << endl;
+cout << ct1.logq << "\t\t:\t\t" << ct2.logq << "\t\t:\t\t" << ct3.logq << endl;
 
 	scheme.addAndEqual(ct1, ct2);
 	scheme.addAndEqual(ct1, ct3);
@@ -581,19 +585,24 @@ Ciphertext MyTools::Sine(Scheme& scheme, Ciphertext& cipher1, double alpha, long
 	long logpp = ctexp1.logp;
 	for (long i = 0; i < t; ++i) {
 		ctexp1 = scheme.mult(ctexp1, ctexp1);
-		ctexp1.reScaleByAndEqual(logpp);
+		for (long k = 0; k < ctexp1.logp + int((logpp-logp)/t); ++k)
+			ctexp1.reScaleByAndEqual(1);
 	}
 
 	auto ct11 = nect;
 	auto ct22 = scheme.mult(ct11, ct11);
-	ct22.reScaleByAndEqual(logp);
+	//ct2.reScaleByAndEqual(logp);
 	auto ct33 = scheme.mult(ct11, ct22);
-	ct33.reScaleByAndEqual(logp);
-	ct22 = scheme.multByConst(ct22, 0.5, logp);
-	ct22.reScaleByAndEqual(logp);
+	//ct3.reScaleByAndEqual(logp);
 	ct33 = scheme.multByConst(ct33, 1./6, logp);
-	ct33.reScaleByAndEqual(logp);
-	ct11.modDownToAndEqual(ct33.logq);
+	//ct3.reScaleByAndEqual(logp);
+	ct22 = scheme.multByConst(ct22, 0.5, ct33.logp-ct22.logp);
+	//ct2.reScaleByAndEqual(logp);
+	ct11 = scheme.multByConst(ct11, 1.0, ct33.logp-ct11.logp);
+	
+	//ct3.modDownToAndEqual(ct1.logq);
+cout << ct11.logp << "\t\t:\t\t" << ct22.logp << "\t\t:\t\t" << ct33.logp << endl;
+cout << ct11.logq << "\t\t:\t\t" << ct22.logq << "\t\t:\t\t" << ct33.logq << endl;
 
 	scheme.addAndEqual(ct11, ct22);
 	scheme.addAndEqual(ct11, ct33);
@@ -601,7 +610,8 @@ Ciphertext MyTools::Sine(Scheme& scheme, Ciphertext& cipher1, double alpha, long
 	logpp = ctexp11.logp;
 	for (long i = 0; i < t; ++i) {
 		ctexp11 = scheme.mult(ctexp11, ctexp11);
-		ctexp11.reScaleByAndEqual(logpp);
+		for (long k = 0; k < ctexp11.logp + int((logpp-logp)/t); ++k)
+			ctexp11.reScaleByAndEqual(1);
 	}
 
 	auto ctres = scheme.sub(ctexp1, ctexp11);
