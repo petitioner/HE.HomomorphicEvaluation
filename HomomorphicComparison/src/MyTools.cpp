@@ -558,6 +558,7 @@ exp(ix) + exp(-ix) = 2cosx
 .5[exp(ix) + exp(-ix)] = cosx
 */
 Ciphertext MyTools::Sine(Scheme& scheme, Ciphertext& cipher1, double alpha, long t, long logp) {
+
 	auto ct = scheme.multByConst(cipher1, alpha*1. / pow(2, t), logp);
 	//ct.reScaleByAndEqual(logp);
 	scheme.imultAndEqual(ct);
@@ -585,7 +586,7 @@ cout << ct1.logq << "\t\t:\t\t" << ct2.logq << "\t\t:\t\t" << ct3.logq << endl;
 	long logpp = ctexp1.logp;
 	for (long i = 0; i < t; ++i) {
 		ctexp1 = scheme.mult(ctexp1, ctexp1);
-		for (long k = 0; k < ctexp1.logp + int((logpp-logp)/t); ++k)
+		for (long k = 0; k < ctexp1.logp; ++k)
 			ctexp1.reScaleByAndEqual(1);
 	}
 
@@ -610,7 +611,7 @@ cout << ct11.logq << "\t\t:\t\t" << ct22.logq << "\t\t:\t\t" << ct33.logq << end
 	logpp = ctexp11.logp;
 	for (long i = 0; i < t; ++i) {
 		ctexp11 = scheme.mult(ctexp11, ctexp11);
-		for (long k = 0; k < ctexp11.logp + int((logpp-logp)/t); ++k)
+		for (long k = 0; k < ctexp11.logp; ++k)
 			ctexp11.reScaleByAndEqual(1);
 	}
 

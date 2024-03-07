@@ -14,10 +14,13 @@ using namespace NTL;
 
 int main(int argc, char **argv) {
 
-	SetNumThreads(8);
+	SetNumThreads(2);
 
+		MyMethods::testSine();
 
 		MyMethods::Sigmoid28();
+
+		//MyMethods::Sigmoid100();
 	
 	
 
