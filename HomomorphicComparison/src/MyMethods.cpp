@@ -195,9 +195,17 @@ void MyMethods::Sigmoid28() {
 
 	cout << endl << endl << "For Octave printing: " << endl << endl << "x = [";
 	for (long i = 0; i < slots; ++i) {
-		cout <<  dvec1[i] << ",\t"  ;
+		mvec1[i] = -28 + 0.1 * i;
+		cout <<  mvec1[i] << ",\t"  ;
+		if (mvec1[i] > 28) break;
 	}
-	cout << "];plot(x)" << endl << endl << endl;
+	cout << "];  y = [" << endl;
+	for (long i = 0; i < slots; ++i) {
+		mvec1[i] = -28 + 0.1 * i;
+		cout <<  dvec1[i] << ",\t"  ;
+		if (mvec1[i] > 28) break;
+	}
+	cout << "];plot(x,y)" << endl << endl << endl;
 
 }
 
