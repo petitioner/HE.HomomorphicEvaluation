@@ -1,3 +1,5 @@
+# 可以使用NN來找最佳多項式 畢竟NN矩陣乘法多項式激活函數的結果就是多項式
+
 # HE.HomomorphicComparison
 
 ```cpp
