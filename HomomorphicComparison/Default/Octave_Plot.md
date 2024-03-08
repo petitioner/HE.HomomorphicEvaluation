@@ -1,3 +1,4 @@
+```Matlab
 GNU Octave, version 4.4.1
 Copyright (C) 2018 John W. Eaton and others.
 This is free software; see the source code for copying conditions.
@@ -21,3 +22,4 @@ For information about changes from previous versions, type 'news'.
 >> hold on
 >> plot(x, 1./(1+exp(-x))-.5)
 >>
+```
