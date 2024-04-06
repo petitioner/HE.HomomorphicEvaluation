@@ -97,16 +97,11 @@ void Ciphertext::modDownToAndEqual(long logq) {
 
 
 void Ciphertext::copy(Ciphertext& o) {
-	logp = o.logp;
-	logq = o.logq;
-	this->slots = o.slots;
-	
-	for (long i = 0; i < N; ++i) {
-		ax[i] = o.ax[i];
-		bx[i] = o.bx[i];
-	}
+	return Ciphertext(this->ax, this->bx, this->logp, this->logq, this->slots,
+			this->isComplex, this->N);
 }
 
+/*
 void Ciphertext::free() {
 	for (long i = 0; i < N; ++i) {
 		clear(ax[i]);
@@ -131,3 +126,4 @@ void Ciphertext::kill() {
 		}
 	}
 }
+*/
