@@ -12,6 +12,10 @@ public:
 
 	static void Sigmoid100();
 
+	static void NNover30();
+
+
+
 };
 
 #endif /* MYMETHODS_H_ */
