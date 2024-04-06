@@ -21,6 +21,9 @@ int main(int argc, char **argv) {
 		MyMethods::Sigmoid28();
 
 		//MyMethods::Sigmoid100();//failed 
+
+		MyMethods::NNover30();
+
 	
 	
 
