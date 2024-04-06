@@ -115,8 +115,8 @@ void Ciphertext::free() {
 }
 
 Ciphertext::~Ciphertext() {
-	delete &ax;
-	delete &bx;
+//	delete &ax;
+//	delete &bx;
 }
 
 void Ciphertext::kill() {
