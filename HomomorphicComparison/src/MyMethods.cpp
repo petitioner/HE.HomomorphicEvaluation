@@ -313,7 +313,7 @@ void MyMethods::NNover30() {
 	long logN = 13;
 	long logQ = 1200;
 	long logp = 20;
-	long logSlots = 11;
+	long logSlots = 14;
 	long slots = (1 << logSlots);
 
 	TimeUtils timeutils;
@@ -325,8 +325,9 @@ void MyMethods::NNover30() {
 	srand(time(NULL));
 
 	string NNweightsfile  = "../data/[30]L7N128_quantized_model_weights.csv";
+	long hidden_units = 1;
 
-		long nnWeightsLen = 0;
+	long nnWeightsLen = 0;
 	long *nnWeightsDims;
 
     double **NNdate = MyTools::dataFromNNweightsFile(NNweightsfile, nnWeightsLen, nnWeightsDims);
@@ -338,5 +339,56 @@ void MyMethods::NNover30() {
     	cout << endl;
     }
     cout << endl;
+
+
+	auto mvec1 = EvaluatorUtils::randomRealArray(slots);
+	for (long i = 0; i < slots; ++i) {
+		mvec1[i] = -30 + 0.01 * i;
+		if (mvec1[i] > 30) mvec1[i] = 0.0;
+	}
+
+	timeutils.start("Encrypt one batch");
+	Ciphertext cipher1 = scheme.encrypt(mvec1, slots, logp, logQ);
+	timeutils.stop("Encrypt one batch");
+
+
+	Ciphertext* CTs = new Ciphertext[hidden_units];
+	for (long i = 0; i < hidden_units; ++i) {
+	    CTs[i].copy(cipher1);
+
+	    CTs[i] = scheme.multByConst(CTs[i], NNdate[0][i], logp);
+	    CTs[i].reScaleByAndEqual(logp);
+	    
+	    scheme.addConst(CTs[i], NNdate[1][i]);
+
+		Ciphertext ctx; ctx.copy(CTs[i]);
+		Ciphertext ctxx; ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[3][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[4][0], logp);
+		ctxx.reScaleByAndEqual(logp);	
+
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConst(ctxx, NNdate[2][0]);
+
+		CTs[i].copy(ctxx);
+
+		// ctx.kill();
+		// ctxx.kill();
+	}
+
+	timeutils.start("Decrypt batch");
+	auto dvec1 = scheme.decrypt(secretKey, CTs[0]);
+	timeutils.stop("Decrypt batch");
+
+	cout << endl << endl << endl;
+	for (long i = 0; i < slots; ++i)
+		cout << dvec1[i] << "\t";
+	cout << endl << endl << endl;
+
 
 }
