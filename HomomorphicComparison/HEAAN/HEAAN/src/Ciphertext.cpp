@@ -99,7 +99,7 @@ void Ciphertext::modDownToAndEqual(long logq) {
 void Ciphertext::copy(Ciphertext& o) {
 	logp = o.logp;
 	logq = o.logq;
-	n = o.n;
+	this->slots = o.slots;
 	
 	for (long i = 0; i < N; ++i) {
 		ax[i] = o.ax[i];
@@ -115,8 +115,8 @@ void Ciphertext::free() {
 }
 
 Ciphertext::~Ciphertext() {
-	delete ax;
-	delete bx;
+	delete &ax;
+	delete &bx;
 }
 
 void Ciphertext::kill() {
