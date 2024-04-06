@@ -171,6 +171,63 @@ double** MyTools::dataFromFile(string& path, long& factorDim, long& sampleDim, d
 	return zData;
 }
 
+
+
+
+double** Tools::dataFromNNweightsFile(string& path, long& len, long* &dims){
+	vector<vector<double>> zline;
+
+	len = 0; 
+	ifstream openfile(path.data());
+	if (openfile.is_open()) {
+		string line, temp;
+		
+		while (getline(openfile, line)) {
+			len++;
+		}
+	}
+
+	dims = new long[len];
+	ifstream openFile(path.data());
+	if (openFile.is_open()) {
+		string line, temp;
+		long idx = 0;
+		while (getline(openFile, line)) {
+		    long sublen = 1;
+			for (long i = 0; i < line.length(); ++i)	
+				if (line[i] == ',')	sublen++;
+			dims[idx] = sublen;
+			idx++;
+
+			size_t start, end;	
+			vector<double> vecline;
+			do {
+				end = line.find_first_of(',', start);
+				temp = line.substr(start, end);
+				vecline.push_back(atof(temp.c_str()));
+				start = end + 1;
+			} while (start);
+			zline.push_back(vecline);
+		}
+	} else {
+		cout << "Error: cannot read file" << endl;
+	}
+
+	double** zData = new double*[len];
+
+	for (long j = 0; j < len; ++j) {
+        double* zj = new double[ dims[j] ];
+		for (long i = 0; i < dims[j]; ++i) { 
+			zj[i] = zline[j][i]; 
+		}
+		zData[j] = zj;
+	}
+
+	return zData;
+}
+
+
+
 double** MyTools::zInvBFromFile(double **zDataTrain, long& factorDim, long& sampleDim, bool isfirst, double epsilon) {
 	vector<vector<double>> zline;
 
