@@ -174,7 +174,7 @@ double** MyTools::dataFromFile(string& path, long& factorDim, long& sampleDim, d
 
 
 
-double** Tools::dataFromNNweightsFile(string& path, long& len, long* &dims){
+double** MyTools::dataFromNNweightsFile(string& path, long& len, long* &dims){
 	vector<vector<double>> zline;
 
 	len = 0; 
