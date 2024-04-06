@@ -56,6 +56,8 @@ public:
 	static double** dataFromFile(string& path, long& factorDim, long& sampleDim, double** &X, double* &Y);
 	static double** zDataFromFile(string& path, long& factorDim, long& sampleDim, bool isfirst = true);
 
+	static double** dataFromNNweightsFile(string& path, long& len, long* &dims);
+
 	static double** zInvBFromFile(double **zDataTrain, long& factorDim, long& sampleDim, bool isfirst = true, double epsilon = 1e-8);
 	static void printData(double** zData, long factorDim, long sampleDim);
 
