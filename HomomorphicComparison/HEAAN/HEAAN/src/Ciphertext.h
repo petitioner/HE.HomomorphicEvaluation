@@ -71,6 +71,14 @@ public:
 
 	void modDownToAndEqual(long newlogq);
 
+	void copy(Ciphertext& o);
+
+	void free();
+
+	virtual ~Ciphertext();
+
+	void kill();
+
 };
 
 
