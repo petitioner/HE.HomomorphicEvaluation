@@ -329,7 +329,7 @@ void MyMethods::NNover30() {
 		long nnWeightsLen = 0;
 	long *nnWeightsDims;
 
-    double **NNdate = Tools::dataFromNNweightsFile(NNweightsfile, nnWeightsLen, nnWeightsDims);
+    double **NNdate = MyTools::dataFromNNweightsFile(NNweightsfile, nnWeightsLen, nnWeightsDims);
     cout << endl << nnWeightsLen << endl;
     for (int i=0; i< nnWeightsLen; i++) {
     	cout << nnWeightsDims[i] << "  ";
