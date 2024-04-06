@@ -324,7 +324,7 @@ void MyMethods::NNover30() {
 
 	srand(time(NULL));
 
-	string NNweightsfile  = "../data/NNweights.csv";
+	string NNweightsfile  = "../data/[30]L7N128_quantized_model_weights.csv";
 
 		long nnWeightsLen = 0;
 	long *nnWeightsDims;
