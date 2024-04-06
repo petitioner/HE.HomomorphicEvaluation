@@ -21,6 +21,7 @@
 #include <vector>        // std::vector
 #include <random>       // std::default_random_engine
 #include <chrono>       // std::chrono::system_clock
+#include <string>
 
 #include <unistd.h>
 
@@ -307,3 +308,35 @@ void MyMethods::Sigmoid100() {
 
 }
 
+void MyMethods::NNover30() {
+
+	long logN = 13;
+	long logQ = 1200;
+	long logp = 20;
+	long logSlots = 11;
+	long slots = (1 << logSlots);
+
+	TimeUtils timeutils;
+	SecretKey secretKey(logN);
+	Scheme scheme(secretKey, logN, logQ);
+
+	SetNumThreads(1);
+
+	srand(time(NULL));
+
+	string NNweightsfile  = "../data/NNweights.csv";
+
+		long nnWeightsLen = 0;
+	long *nnWeightsDims;
+
+    double **NNdate = Tools::dataFromNNweightsFile(NNweightsfile, nnWeightsLen, nnWeightsDims);
+    cout << endl << nnWeightsLen << endl;
+    for (int i=0; i< nnWeightsLen; i++) {
+    	cout << nnWeightsDims[i] << "  ";
+    	for (int j=0; j < (nnWeightsDims[i]<12?nnWeightsDims[i]:12); j++)
+    			cout << NNdate[i][j] << "  ";
+    	cout << endl;
+    }
+    cout << endl;
+
+}
