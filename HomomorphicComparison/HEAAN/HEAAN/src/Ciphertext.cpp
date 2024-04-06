@@ -93,8 +93,14 @@ void Ciphertext::modDownToAndEqual(long logq) {
 	Ring::modAndEqual(this->bx, q, N);
 }
 
+
+
+
 void Ciphertext::copy(Ciphertext& o) {
-	copyParams(o);
+	logp = o.logp;
+	logq = o.logq;
+	n = o.n;
+	
 	for (long i = 0; i < N; ++i) {
 		ax[i] = o.ax[i];
 		bx[i] = o.bx[i];
@@ -109,8 +115,8 @@ void Ciphertext::free() {
 }
 
 Ciphertext::~Ciphertext() {
-	delete[] ax;
-	delete[] bx;
+	delete ax;
+	delete bx;
 }
 
 void Ciphertext::kill() {
