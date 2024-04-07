@@ -310,9 +310,11 @@ void MyMethods::Sigmoid100() {
 
 void MyMethods::NNover30() {
 
+cout << endl << endl << endl << "void MyMethods::NNover30() {" << endl << endl << endl;
+
 	long logN = 13;
 	long logQ = 1200;
-	long logp = 20;
+	long logp = 60;
 	long logSlots = 14;
 	long slots = (1 << logSlots);
 
@@ -345,6 +347,7 @@ void MyMethods::NNover30() {
 	for (long i = 0; i < slots; ++i) {
 		mvec1[i] = -30 + 0.01 * i;
 		if (mvec1[i] > 30) mvec1[i] = 0.0;
+cout << mvec1[i] << "\t";
 	}
 
 	timeutils.start("Encrypt one batch");
@@ -353,6 +356,8 @@ void MyMethods::NNover30() {
 
 
 	Ciphertext* CTs = new Ciphertext[hidden_units];
+CTs[0].copy(cipher1);
+/*
 	for (long i = 0; i < hidden_units; ++i) {
 	    CTs[i].copy(cipher1);
 
@@ -377,15 +382,19 @@ void MyMethods::NNover30() {
 
 		CTs[i].copy(ctxx);
 
-		// ctx.kill();
-		// ctxx.kill();
-	}
+		ctx.free();
+		ctxx.free();
 
+	}
+*/
+
+	Ciphertext cCTs;
+        cCTs.copy(cipher1);
 	timeutils.start("Decrypt batch");
-	auto dvec1 = scheme.decrypt(secretKey, CTs[0]);
+	auto dvec1 = scheme.decrypt(secretKey, cipher1);
 	timeutils.stop("Decrypt batch");
 
-	cout << endl << endl << endl;
+	cout << endl << endl << endl << "SDFS:" << endl;
 	for (long i = 0; i < slots; ++i)
 		cout << dvec1[i] << "\t";
 	cout << endl << endl << endl;
