@@ -312,9 +312,9 @@ void MyMethods::NNover30() {
 
 cout << endl << endl << endl << "void MyMethods::NNover30() {" << endl << endl << endl;
 
-	long logN = 13;
+	long logN = 15;
 	long logQ = 1200;
-	long logp = 60;
+	long logp = 20;
 	long logSlots = 14;
 	long slots = (1 << logSlots);
 
@@ -356,8 +356,6 @@ cout << mvec1[i] << "\t";
 
 
 	Ciphertext* CTs = new Ciphertext[hidden_units];
-CTs[0].copy(cipher1);
-/*
 	for (long i = 0; i < hidden_units; ++i) {
 	    CTs[i].copy(cipher1);
 
@@ -386,12 +384,11 @@ CTs[0].copy(cipher1);
 		ctxx.free();
 
 	}
-*/
 
-	Ciphertext cCTs;
-        cCTs.copy(cipher1);
+
+
 	timeutils.start("Decrypt batch");
-	auto dvec1 = scheme.decrypt(secretKey, cipher1);
+	auto dvec1 = scheme.decrypt(secretKey, CTs[0]);
 	timeutils.stop("Decrypt batch");
 
 	cout << endl << endl << endl << "SDFS:" << endl;
