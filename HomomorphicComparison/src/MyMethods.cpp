@@ -430,15 +430,15 @@ scheme.addAndEqual(outputCT, tempCT);
 		Ciphertext ctxx; ctxx = scheme.mult(ctx, ctx);
 		ctxx.reScaleByAndEqual(logp);
 
-		ctx = scheme.multByConst(ctx, NNdate[3][0], logp);
+		ctx = scheme.multByConst(ctx, NNdate[8][0], logp);
 		ctx.reScaleByAndEqual(logp);
 
-		ctxx = scheme.multByConst(ctxx, NNdate[4][0], logp);
+		ctxx = scheme.multByConst(ctxx, NNdate[9][0], logp);
 		ctxx.reScaleByAndEqual(logp);	
 
 		scheme.addAndEqual(ctxx, ctx);
 
-		scheme.addConstAndEqual(ctxx, NNdate[2][0]);
+		scheme.addConstAndEqual(ctxx, NNdate[7][0]);
 
 		outputCT.copy(ctxx);
 		outputCTs[outputidx].copy(outputCT);
