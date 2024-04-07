@@ -314,7 +314,7 @@ cout << endl << endl << endl << "void MyMethods::NNover30() {" << endl << endl <
 
 	long logN = 15;
 	long logQ = 1200;
-	long logp = 30;
+	long logp = 45;
 	long logSlots = 14;
 	long slots = (1 << logSlots);
 
