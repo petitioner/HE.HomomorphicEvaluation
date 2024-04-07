@@ -393,14 +393,63 @@ for (int i = 0; i < hidden_units; ++i) {
 	cout << wmatrix[i][j] << "\t";
     }
 	cout << endl << endl;
-}
-    
+}    
 double* bvector = new double[hidden_units]();
 cout << endl << "bvector: " << endl;
 for (long i=0; i < hidden_units; ++i) {
         bvector[i] = NNdate[6][i];
 cout << bvector[i] << "\t";
 }
+Ciphertext* outputCTs = new Ciphertext[hidden_units];
+for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
+	auto mvec = EvaluatorUtils::randomRealArray(slots);
+	for (long i = 0; i < slots; ++i) {
+		mvec[i] = bvector[outputidx];
+	}
+        auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
+	delete[] mvec;
+	for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+		auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+		if (outputCT.logp > tempCT.logp) 		
+			for (long k = 0; k < outputCT.logp - tempCT.logp; ++k)
+				outputCT.reScaleByAndEqual(1);
+		if (outputCT.logp < tempCT.logp) 		
+			for (long k = 0; k < tempCT.logp - outputCT.logp; ++k)
+				tempCT.reScaleByAndEqual(1);
+		if (outputCT.logq > tempCT.logq) 	
+			outputCT.modDownToAndEqual(tempCT.logq);
+		if (outputCT.logq < tempCT.logq) 	
+			tempCT.modDownToAndEqual(outputCT.logq);
+
+		cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
+cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+scheme.addAndEqual(outputCT, tempCT);
+		tempCT.free();
+	}
+
+		Ciphertext ctx; ctx.copy(outputCT);
+		Ciphertext ctxx; ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[3][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[4][0], logp);
+		ctxx.reScaleByAndEqual(logp);	
+
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConstAndEqual(ctxx, NNdate[2][0]);
+
+		outputCT.copy(ctxx);
+		outputCTs[outputidx].copy(outputCT);
+outputCT.free();
+
+		ctx.free();
+		ctxx.free();
+}
+CTs[0].copy(outputCTs[0]);
+
 
 
 	timeutils.start("Decrypt batch");
