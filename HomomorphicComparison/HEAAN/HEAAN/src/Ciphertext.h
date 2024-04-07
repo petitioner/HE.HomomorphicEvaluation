@@ -48,6 +48,13 @@ public:
 					o.isComplex), N(o.N) {
 	}
 
+	void copy(Ciphertext& o);
+
+	void free();
+
+
+
+
 	Ciphertext negate();
 
 	void negateAndEqual();
@@ -71,13 +78,7 @@ public:
 
 	void modDownToAndEqual(long newlogq);
 
-	void copy(Ciphertext& o);
 
-	void free();
-
-	virtual ~Ciphertext();
-
-	void kill();
 
 };
 
