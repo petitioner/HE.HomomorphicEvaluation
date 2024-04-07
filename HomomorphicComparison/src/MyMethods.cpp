@@ -314,7 +314,7 @@ cout << endl << endl << endl << "void MyMethods::NNover30() {" << endl << endl <
 
 	long logN = 15;
 	long logQ = 1200;
-	long logp = 20;
+	long logp = 30;
 	long logSlots = 14;
 	long slots = (1 << logSlots);
 
@@ -327,7 +327,7 @@ cout << endl << endl << endl << "void MyMethods::NNover30() {" << endl << endl <
 	srand(time(NULL));
 
 	string NNweightsfile  = "../data/[30]L7N128_quantized_model_weights.csv";
-	long hidden_units = 1;
+	long hidden_units = 128;
 
 	long nnWeightsLen = 0;
 	long *nnWeightsDims;
@@ -360,9 +360,8 @@ cout << mvec1[i] << "\t";
 	    CTs[i].copy(cipher1);
 
 	    CTs[i] = scheme.multByConst(CTs[i], NNdate[0][i], logp);
-	    CTs[i].reScaleByAndEqual(logp);
-	    
-	    scheme.addConst(CTs[i], NNdate[1][i]);
+	    CTs[i].reScaleByAndEqual(logp); 
+	    scheme.addConstAndEqual(CTs[i], NNdate[1][i]);
 
 		Ciphertext ctx; ctx.copy(CTs[i]);
 		Ciphertext ctxx; ctxx = scheme.mult(ctx, ctx);
@@ -376,7 +375,7 @@ cout << mvec1[i] << "\t";
 
 		scheme.addAndEqual(ctxx, ctx);
 
-		scheme.addConst(ctxx, NNdate[2][0]);
+		scheme.addConstAndEqual(ctxx, NNdate[2][0]);
 
 		CTs[i].copy(ctxx);
 
@@ -385,6 +384,23 @@ cout << mvec1[i] << "\t";
 
 	}
 
+double** wmatrix = new double*[hidden_units]; 
+cout << endl << "wmatrix: " << endl;
+for (int i = 0; i < hidden_units; ++i) {
+    wmatrix[i] = new double[hidden_units](); 
+    for(int j = 0; j < hidden_units; ++j) {
+        wmatrix[i][j] = NNdate[5][i * hidden_units + j];
+	cout << wmatrix[i][j] << "\t";
+    }
+	cout << endl << endl;
+}
+    
+double* bvector = new double[hidden_units]();
+cout << endl << "bvector: " << endl;
+for (long i=0; i < hidden_units; ++i) {
+        bvector[i] = NNdate[6][i];
+cout << bvector[i] << "\t";
+}
 
 
 	timeutils.start("Decrypt batch");
