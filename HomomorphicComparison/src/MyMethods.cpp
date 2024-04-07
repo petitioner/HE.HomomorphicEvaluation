@@ -410,12 +410,11 @@ for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 	delete[] mvec;
 	for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 		auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+tempCT.reScaleByAndEqual(logp);
 		if (outputCT.logp > tempCT.logp) 		
-			for (long k = 0; k < outputCT.logp - tempCT.logp; ++k)
-				outputCT.reScaleByAndEqual(1);
+			outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
 		if (outputCT.logp < tempCT.logp) 		
-			for (long k = 0; k < tempCT.logp - outputCT.logp; ++k)
-				tempCT.reScaleByAndEqual(1);
+			tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
 		if (outputCT.logq > tempCT.logq) 	
 			outputCT.modDownToAndEqual(tempCT.logq);
 		if (outputCT.logq < tempCT.logq) 	
