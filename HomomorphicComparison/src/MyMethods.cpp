@@ -456,7 +456,7 @@ CTs[0].copy(outputCTs[0]);
 	timeutils.stop("Decrypt batch");
 
 	cout << endl << endl << endl << "SDFS:" << endl;
-	for (long i = 0; i < slots; ++i)
+	for (long i = 0; i < 300; ++i)
 		cout << dvec1[i] << "\t";
 	cout << endl << endl << endl;
 
