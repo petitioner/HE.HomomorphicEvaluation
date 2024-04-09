@@ -390,7 +390,7 @@ ctx.modDownToAndEqual(ctxx.logq);
 		ctxx.free();
 
 	}
-/*
+
 double** wmatrix = new double*[hidden_units]; 
 cout << endl << "wmatrix: " << endl;
 for (int i = 0; i < hidden_units; ++i) {
@@ -443,6 +443,15 @@ scheme.addAndEqual(outputCT, tempCT);
 		ctxx = scheme.multByConst(ctxx, NNdate[9][0], logp);
 		ctxx.reScaleByAndEqual(logp);	
 
+cout << "ctx.logp" << ctx.logp << endl;
+cout << "ctxx.logp" << ctxx.logp << endl;
+cout << "ctx.logq" << ctx.logq << endl;
+cout << "ctxx.logq" << ctxx.logq << endl;
+ctx.modDownToAndEqual(ctxx.logq);
+cout << "ctx.logp" << ctx.logp << endl;
+cout << "ctxx.logp" << ctxx.logp << endl;
+cout << "ctx.logq" << ctx.logq << endl;
+cout << "ctxx.logq" << ctxx.logq << endl;
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[7][0]);
@@ -456,7 +465,7 @@ outputCT.free();
 }
 CTs[0].copy(outputCTs[0]);
 
-*/
+
 cout << "NNdate[0][0]" << NNdate[0][0] << endl;
 
 
