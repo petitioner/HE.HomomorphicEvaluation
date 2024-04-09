@@ -358,7 +358,7 @@ cout << mvec1[i] << "\t";
 	Ciphertext* CTs = new Ciphertext[hidden_units];
 	for (long i = 0; i < hidden_units; ++i) {
 	    CTs[i].copy(cipher1);
-
+/*
 	    CTs[i] = scheme.multByConst(CTs[i], NNdate[0][i], logp);
 	    CTs[i].reScaleByAndEqual(logp); 
 	    scheme.addConstAndEqual(CTs[i], NNdate[1][i]);
@@ -381,9 +381,9 @@ cout << mvec1[i] << "\t";
 
 		ctx.free();
 		ctxx.free();
-
+*/
 	}
-
+/*
 double** wmatrix = new double*[hidden_units]; 
 cout << endl << "wmatrix: " << endl;
 for (int i = 0; i < hidden_units; ++i) {
@@ -449,7 +449,7 @@ outputCT.free();
 }
 CTs[0].copy(outputCTs[0]);
 
-
+*/
 
 	timeutils.start("Decrypt batch");
 	auto dvec1 = scheme.decrypt(secretKey, CTs[0]);
