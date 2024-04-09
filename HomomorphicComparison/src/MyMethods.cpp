@@ -22,6 +22,7 @@
 #include <random>       // std::default_random_engine
 #include <chrono>       // std::chrono::system_clock
 #include <string>
+#include <omp.h>      // openmg
 
 #include <unistd.h>
 
@@ -356,7 +357,8 @@ cout << mvec1[i] << "\t";
 
 
 	Ciphertext* CTs = new Ciphertext[hidden_units];
-	for (long i = 0; i < hidden_units; ++i) {
+	NTL_EXEC_RANGE(hidden_units, first, last);
+	for (long i = first; i < last; ++i) {
 	    CTs[i].copy(cipher1);
 
 	    CTs[i] = scheme.multByConst(CTs[i], NNdate[0][i], logp);
@@ -390,6 +392,7 @@ ctx.modDownToAndEqual(ctxx.logq);
 		ctxx.free();
 
 	}
+	NTL_EXEC_RANGE_END;
 
 double** wmatrix = new double*[hidden_units]; 
 cout << endl << "wmatrix: " << endl;
@@ -415,7 +418,9 @@ for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 	}
         auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 	delete[] mvec;
-	for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+	
+	NTL_EXEC_RANGE(hidden_units, first, last);
+	for (long inputidx = first; inputidx < last; ++inputidx) {
 		auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
 tempCT.reScaleByAndEqual(logp);
 		if (outputCT.logp > tempCT.logp) 		
@@ -432,6 +437,7 @@ cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << 
 scheme.addAndEqual(outputCT, tempCT);
 		tempCT.free();
 	}
+	NTL_EXEC_RANGE_END;
 
 		Ciphertext ctx; ctx.copy(outputCT);
 		Ciphertext ctxx; ctxx = scheme.mult(ctx, ctx);
@@ -463,6 +469,87 @@ outputCT.free();
 		ctx.free();
 		ctxx.free();
 }
+
+
+// Layer 2 -- 
+
+wmatrix = new double*[hidden_units]; 
+cout << endl << "wmatrix: " << endl;
+for (int i = 0; i < hidden_units; ++i) {
+    wmatrix[i] = new double[hidden_units](); 
+    for(int j = 0; j < hidden_units; ++j) {
+        wmatrix[i][j] = NNdate[10][i * hidden_units + j];
+	cout << wmatrix[i][j] << "\t";
+    }
+	cout << endl << endl;
+}    
+bvector = new double[hidden_units]();
+cout << endl << "bvector: " << endl;
+for (long i=0; i < hidden_units; ++i) {
+        bvector[i] = NNdate[11][i];
+cout << bvector[i] << "\t";
+}
+outputCTs = new Ciphertext[hidden_units];
+for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
+	auto mvec = EvaluatorUtils::randomRealArray(slots);
+	for (long i = 0; i < slots; ++i) {
+		mvec[i] = bvector[outputidx];
+	}
+        auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
+	delete[] mvec;
+
+	NTL_EXEC_RANGE(hidden_units, first, last);
+	for (long inputidx = first; inputidx < last; ++inputidx) {
+		auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+tempCT.reScaleByAndEqual(logp);
+		if (outputCT.logp > tempCT.logp) 		
+			outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
+		if (outputCT.logp < tempCT.logp) 		
+			tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
+		if (outputCT.logq > tempCT.logq) 	
+			outputCT.modDownToAndEqual(tempCT.logq);
+		if (outputCT.logq < tempCT.logq) 	
+			tempCT.modDownToAndEqual(outputCT.logq);
+
+		cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
+cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+scheme.addAndEqual(outputCT, tempCT);
+		tempCT.free();
+	}
+	NTL_EXEC_RANGE_END;
+
+		Ciphertext ctx; ctx.copy(outputCT);
+		Ciphertext ctxx; ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[13][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[14][0], logp);
+		ctxx.reScaleByAndEqual(logp);	
+
+cout << "ctx.logp" << ctx.logp << endl;
+cout << "ctxx.logp" << ctxx.logp << endl;
+cout << "ctx.logq" << ctx.logq << endl;
+cout << "ctxx.logq" << ctxx.logq << endl;
+ctx.modDownToAndEqual(ctxx.logq);
+cout << "ctx.logp" << ctx.logp << endl;
+cout << "ctxx.logp" << ctxx.logp << endl;
+cout << "ctx.logq" << ctx.logq << endl;
+cout << "ctxx.logq" << ctxx.logq << endl;
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConstAndEqual(ctxx, NNdate[12][0]);
+
+		outputCT.copy(ctxx);
+		outputCTs[outputidx].copy(outputCT);
+outputCT.free();
+
+		ctx.free();
+		ctxx.free();
+}
+
+
 CTs[0].copy(outputCTs[0]);
 
 
