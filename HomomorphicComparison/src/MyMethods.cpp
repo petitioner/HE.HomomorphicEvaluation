@@ -374,22 +374,18 @@ cout << mvec1[i] << "\t";
 
 		ctxx = scheme.multByConst(ctxx, NNdate[4][0], logp);
 		ctxx.reScaleByAndEqual(logp);	
-if(ctxx.logp != ctx.logp) cout << "SDFDSFDSSEES" << endl << endl;
-cout << "ctxx.logp" << ctxx.logp << endl;
-cout << "ctx.logp" << ctx.logp << endl;
-cout << "ctxx.logq" << ctxx.logq << endl;
-cout << "ctx.logq" << ctx.logq << endl;
+
 ctx.modDownToAndEqual(ctxx.logq);
-cout << "ctxx.logp" << ctxx.logp << endl;
-cout << "ctx.logp" << ctx.logp << endl;
-cout << "ctxx.logq" << ctxx.logq << endl;
-cout << "ctx.logq" << ctx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
-CTs[i].copy(ctxx);
-/*
-		scheme.addConstAndEqual(ctxx, NNdate[2][0]);
 
 		CTs[i].copy(ctxx);
+
+/*
+		scheme.addConstAndEqual(ctxx, NNdate[2][0], logp); //Error !
+
+		CTs[i].copy(ctxx);
+
 
 		ctx.free();
 		ctxx.free();
@@ -471,6 +467,8 @@ cout << "NNdate[0][0]" << NNdate[0][0] << endl;
 
 cout << "+ NNdate[1][0]" << NNdate[1][0] << endl;
 cout << "+ NNdate[3][0]" << NNdate[4][0] << endl;
+
+cout << "+ NNdate[2][0]" << NNdate[2][0] << endl;
 	cout << endl << endl << endl << "SDFS:" << endl;
 	for (long i = 0; i < 300; ++i)
 		cout << dvec1[i] << "\t";
