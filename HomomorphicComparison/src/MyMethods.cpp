@@ -315,7 +315,7 @@ cout << endl << endl << endl << "void MyMethods::NNover30() {" << endl << endl <
 	long logN = 15;
 	long logQ = 1200;
 	long logp = 45;
-	long logSlots = 14;
+	long logSlots = 10;
 	long slots = (1 << logSlots);
 
 	TimeUtils timeutils;
@@ -345,7 +345,7 @@ cout << endl << endl << endl << "void MyMethods::NNover30() {" << endl << endl <
 
 	auto mvec1 = EvaluatorUtils::randomRealArray(slots);
 	for (long i = 0; i < slots; ++i) {
-		mvec1[i] = -30 + 0.01 * i;
+		mvec1[i] = -30 + 0.1 * i;
 		if (mvec1[i] > 30) mvec1[i] = 0.0;
 cout << mvec1[i] << "\t";
 	}
@@ -377,19 +377,18 @@ cout << mvec1[i] << "\t";
 
 ctx.modDownToAndEqual(ctxx.logq);
 
+
 		scheme.addAndEqual(ctxx, ctx);
 
-		CTs[i].copy(ctxx);
 
-/*
-		scheme.addConstAndEqual(ctxx, NNdate[2][0], logp); //Error !
+		scheme.addConstAndEqual(ctxx, NNdate[2][0]);
 
 		CTs[i].copy(ctxx);
 
 
 		ctx.free();
 		ctxx.free();
-*/
+
 	}
 /*
 double** wmatrix = new double*[hidden_units]; 
@@ -470,7 +469,7 @@ cout << "+ NNdate[3][0]" << NNdate[4][0] << endl;
 
 cout << "+ NNdate[2][0]" << NNdate[2][0] << endl;
 	cout << endl << endl << endl << "SDFS:" << endl;
-	for (long i = 0; i < 300; ++i)
+	for (long i = 0; i < slots; ++i)
 		cout << dvec1[i] << ",\t";
 	cout << endl << endl << endl;
 
