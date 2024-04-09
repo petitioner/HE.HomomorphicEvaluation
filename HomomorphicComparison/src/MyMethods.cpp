@@ -471,7 +471,11 @@ outputCT.free();
 }
 
 
-// Layer 2 -- 
+
+// Input > Layer0 > Layer1 > Layer2 > Layer3 ...	
+// BEG: Layer1 > Layer2
+for (long i = 0; i < hidden_units; ++i) 
+	CTs[i].copy(outputCTs[i]);
 
 wmatrix = new double*[hidden_units]; 
 cout << endl << "wmatrix: " << endl;
@@ -497,7 +501,7 @@ for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 	}
         auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 	delete[] mvec;
-
+	
 	NTL_EXEC_RANGE(hidden_units, first, last);
 	for (long inputidx = first; inputidx < last; ++inputidx) {
 		auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -548,6 +552,7 @@ outputCT.free();
 		ctx.free();
 		ctxx.free();
 }
+// END: Layer1 > Layer2
 
 
 CTs[0].copy(outputCTs[0]);
