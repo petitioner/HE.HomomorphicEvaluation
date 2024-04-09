@@ -471,7 +471,7 @@ cout << "+ NNdate[3][0]" << NNdate[4][0] << endl;
 cout << "+ NNdate[2][0]" << NNdate[2][0] << endl;
 	cout << endl << endl << endl << "SDFS:" << endl;
 	for (long i = 0; i < 300; ++i)
-		cout << dvec1[i] << "\t";
+		cout << dvec1[i] << ",\t";
 	cout << endl << endl << endl;
 
 
