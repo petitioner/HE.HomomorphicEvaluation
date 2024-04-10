@@ -980,9 +980,14 @@ for (long i = 0; i < hidden_units; ++i) {
 
 	    outputCTs[i].reScaleByAndEqual(logp); 
 
-if (resultCT.logp != outputCTs[i].logp) {cout << "ESEFEFSE" << endl; exit(-1);}
-if (resultCT.logq != outputCTs[i].logq) {cout << "ESEFEFSE" << endl; exit(-1);}
-
+		if (resultCT.logp > outputCTs[i].logp) 		
+			resultCT.reScaleByAndEqual(resultCT.logp - outputCTs[i].logp);
+		if (resultCT.logp < outputCTs[i].logp) 		
+			outputCTs[i].reScaleByAndEqual(outputCTs[i].logp - resultCT.logp);
+		if (resultCT.logq > outputCTs[i].logq) 	
+			resultCT.modDownToAndEqual(outputCTs[i].logq);
+		if (resultCT.logq < outputCTs[i].logq) 	
+			outputCTs[i].modDownToAndEqual(resultCT.logq);
 	    scheme.addAndEqual(resultCT, outputCTs[i]);
 
 }
