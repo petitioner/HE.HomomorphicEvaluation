@@ -14,7 +14,7 @@ using namespace NTL;
 
 int main(int argc, char **argv) {
 
-	SetNumThreads(6);
+	SetNumThreads(4);
 
 		MyMethods::testSine();
 
