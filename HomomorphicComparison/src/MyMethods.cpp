@@ -915,6 +915,7 @@ void MyMethods::NNover30() {
 		scheme.addAndEqual(resultCT, outputCTs[i]);
 
 	}
+	scheme.addConstAndEqual(resultCT, NNdate[36][0]);
 
 // END: Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output
 
