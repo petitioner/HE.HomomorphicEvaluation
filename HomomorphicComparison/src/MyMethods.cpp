@@ -316,7 +316,7 @@ cout << endl << endl << endl << "void MyMethods::NNover30() {" << endl << endl <
 	long logN = 15;
 	long logQ = 1200;
 	long logp = 45;
-	long logSlots = 10;
+	long logSlots = 13;
 	long slots = (1 << logSlots);
 
 	TimeUtils timeutils;
@@ -346,7 +346,7 @@ cout << endl << endl << endl << "void MyMethods::NNover30() {" << endl << endl <
 
 	auto mvec1 = EvaluatorUtils::randomRealArray(slots);
 	for (long i = 0; i < slots; ++i) {
-		mvec1[i] = -30 + 0.1 * i;
+		mvec1[i] = -30 + 0.01 * i;
 		if (mvec1[i] > 30) mvec1[i] = 0.0;
 cout << mvec1[i] << "\t";
 	}
@@ -355,8 +355,8 @@ cout << mvec1[i] << "\t";
 	Ciphertext cipher1 = scheme.encrypt(mvec1, slots, logp, logQ);
 	timeutils.stop("Encrypt one batch");
 
-// Input > Layer0 > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
-// Input > Layer0
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1
 	Ciphertext* CTs = new Ciphertext[hidden_units];
 	NTL_EXEC_RANGE(hidden_units, first, last)
 	for (long i = first; i < last; ++i) {
@@ -395,8 +395,8 @@ ctx.modDownToAndEqual(ctxx.logq);
 	}
 	NTL_EXEC_RANGE_END
 
-// Input > Layer0 > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
-// Input > Layer0 > Layer1
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2
 double** wmatrix = new double*[hidden_units]; 
 cout << endl << "wmatrix: " << endl;
 for (int i = 0; i < hidden_units; ++i) {
@@ -475,8 +475,8 @@ outputCT.free();
 
 
 
-// Input > Layer0 > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output
-// Input > Layer0 > Layer1 > Layer2
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3
 for (long i = 0; i < hidden_units; ++i) 
 	CTs[i].copy(outputCTs[i]);
 
@@ -556,90 +556,8 @@ outputCT.free();
 		ctxx.free();
 }
 
-// Input > Layer0 > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
-// Input > Layer0 > Layer1 > Layer2 > Layer3
-for (long i = 0; i < hidden_units; ++i) 
-	CTs[i].copy(outputCTs[i]);
-
-wmatrix = new double*[hidden_units]; 
-cout << endl << "wmatrix: " << endl;
-for (int i = 0; i < hidden_units; ++i) {
-    wmatrix[i] = new double[hidden_units](); 
-    for(int j = 0; j < hidden_units; ++j) {
-        wmatrix[i][j] = NNdate[10][i * hidden_units + j];
-	cout << wmatrix[i][j] << "\t";
-    }
-	cout << endl << endl;
-}    
-bvector = new double[hidden_units]();
-cout << endl << "bvector: " << endl;
-for (long i=0; i < hidden_units; ++i) {
-        bvector[i] = NNdate[11][i];
-cout << bvector[i] << "\t";
-}
-outputCTs = new Ciphertext[hidden_units];
-for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
-	auto mvec = EvaluatorUtils::randomRealArray(slots);
-	for (long i = 0; i < slots; ++i) {
-		mvec[i] = bvector[outputidx];
-	}
-        auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
-	delete[] mvec;
-	
-	NTL_EXEC_RANGE(hidden_units, first, last)
-	for (long inputidx = first; inputidx < last; ++inputidx) {
-		auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
-tempCT.reScaleByAndEqual(logp);
-		if (outputCT.logp > tempCT.logp) 		
-			outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
-		if (outputCT.logp < tempCT.logp) 		
-			tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
-		if (outputCT.logq > tempCT.logq) 	
-			outputCT.modDownToAndEqual(tempCT.logq);
-		if (outputCT.logq < tempCT.logq) 	
-			tempCT.modDownToAndEqual(outputCT.logq);
-
-		cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
-scheme.addAndEqual(outputCT, tempCT);
-		tempCT.free();
-	}
-	NTL_EXEC_RANGE_END
-
-		Ciphertext ctx; ctx.copy(outputCT);
-		Ciphertext ctxx; ctxx = scheme.mult(ctx, ctx);
-		ctxx.reScaleByAndEqual(logp);
-
-		ctx = scheme.multByConst(ctx, NNdate[13][0], logp);
-		ctx.reScaleByAndEqual(logp);
-
-		ctxx = scheme.multByConst(ctxx, NNdate[14][0], logp);
-		ctxx.reScaleByAndEqual(logp);	
-
-cout << "ctx.logp" << ctx.logp << endl;
-cout << "ctxx.logp" << ctxx.logp << endl;
-cout << "ctx.logq" << ctx.logq << endl;
-cout << "ctxx.logq" << ctxx.logq << endl;
-ctx.modDownToAndEqual(ctxx.logq);
-cout << "ctx.logp" << ctx.logp << endl;
-cout << "ctxx.logp" << ctxx.logp << endl;
-cout << "ctx.logq" << ctx.logq << endl;
-cout << "ctxx.logq" << ctxx.logq << endl;
-		scheme.addAndEqual(ctxx, ctx);
-
-		scheme.addConstAndEqual(ctxx, NNdate[12][0]);
-
-		outputCT.copy(ctxx);
-		outputCTs[outputidx].copy(outputCT);
-outputCT.free();
-
-		ctx.free();
-		ctxx.free();
-}
-
-
-// Input > Layer0 > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
-// Input > Layer0 > Layer1 > Layer2 > Layer3 > Layer4
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 
 for (long i = 0; i < hidden_units; ++i) 
 	CTs[i].copy(outputCTs[i]);
 
@@ -720,8 +638,8 @@ outputCT.free();
 }
 
 
-// Input > Layer0 > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
-// Input > Layer0 > Layer1 > Layer2 > Layer3 > Layer4 > Layer5
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 
 for (long i = 0; i < hidden_units; ++i) 
 	CTs[i].copy(outputCTs[i]);
 
@@ -802,8 +720,8 @@ outputCT.free();
 }
 
 
-// Input > Layer0 > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
-// Input > Layer0 > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 
 for (long i = 0; i < hidden_units; ++i) 
 	CTs[i].copy(outputCTs[i]);
 
@@ -884,8 +802,8 @@ outputCT.free();
 }
 
 
-// Input > Layer0 > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
-// Input > Layer0 > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 
 for (long i = 0; i < hidden_units; ++i) 
 	CTs[i].copy(outputCTs[i]);
 
@@ -966,8 +884,8 @@ outputCT.free();
 }
 
 
-// Input > Layer0 > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
-// Input > Layer0 > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output
 	auto mres = EvaluatorUtils::randomRealArray(slots);
 	for (long i = 0; i < slots; ++i) {
 		mres[i] = 0;
@@ -991,8 +909,8 @@ for (long i = 0; i < hidden_units; ++i) {
 	    scheme.addAndEqual(resultCT, outputCTs[i]);
 
 }
-
-// END: Input > Layer0 > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output
+*/
+// END: Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output
 
 
 CTs[0].copy(resultCT);
