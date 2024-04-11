@@ -323,7 +323,7 @@ void MyMethods::NNover30() {
 	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, logN, logQ);
 
-	////////////////////////////////////////////////////// SetNumThreads(1);
+	////////////////////////////////////////////////////// SetNumThreads(1); //
 
 	srand(time(NULL));
 
