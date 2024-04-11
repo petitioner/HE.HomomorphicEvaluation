@@ -420,6 +420,7 @@ cout << mvec1[i] << "\t";
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -433,11 +434,18 @@ cout << mvec1[i] << "\t";
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -507,6 +515,7 @@ cout << mvec1[i] << "\t";
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -520,11 +529,21 @@ cout << mvec1[i] << "\t";
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
+
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -593,6 +612,7 @@ cout << mvec1[i] << "\t";
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -606,11 +626,18 @@ cout << mvec1[i] << "\t";
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -679,6 +706,7 @@ cout << mvec1[i] << "\t";
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -692,11 +720,18 @@ cout << mvec1[i] << "\t";
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -766,6 +801,7 @@ cout << mvec1[i] << "\t";
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -779,11 +815,18 @@ cout << mvec1[i] << "\t";
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -854,6 +897,7 @@ cout << mvec1[i] << "\t";
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -867,11 +911,19 @@ cout << mvec1[i] << "\t";
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -1068,6 +1120,7 @@ void MyMethods::NNover50() {
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -1081,11 +1134,18 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -1144,6 +1204,7 @@ void MyMethods::NNover50() {
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -1157,11 +1218,18 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -1220,6 +1288,7 @@ void MyMethods::NNover50() {
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -1233,11 +1302,18 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -1296,6 +1372,7 @@ void MyMethods::NNover50() {
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -1309,11 +1386,18 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -1372,6 +1456,7 @@ void MyMethods::NNover50() {
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -1385,11 +1470,18 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -1448,6 +1540,7 @@ void MyMethods::NNover50() {
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -1461,11 +1554,19 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -1525,6 +1626,7 @@ void MyMethods::NNover50() {
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -1538,11 +1640,18 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -1603,6 +1712,7 @@ void MyMethods::NNover50() {
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -1616,11 +1726,19 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -1813,6 +1931,7 @@ void MyMethods::NNover70() {
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -1826,11 +1945,19 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -1889,6 +2016,7 @@ void MyMethods::NNover70() {
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -1902,11 +2030,19 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -1965,6 +2101,7 @@ void MyMethods::NNover70() {
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -1978,11 +2115,19 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -2041,6 +2186,7 @@ void MyMethods::NNover70() {
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -2054,11 +2200,19 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -2117,6 +2271,7 @@ void MyMethods::NNover70() {
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -2130,11 +2285,20 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -2193,6 +2357,7 @@ void MyMethods::NNover70() {
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -2206,11 +2371,19 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -2270,6 +2443,7 @@ void MyMethods::NNover70() {
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -2283,11 +2457,18 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -2348,6 +2529,7 @@ void MyMethods::NNover70() {
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -2361,11 +2543,19 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -2425,6 +2615,7 @@ void MyMethods::NNover70() {
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -2438,11 +2629,19 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
+
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -2501,6 +2700,7 @@ void MyMethods::NNover70() {
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
+		Ciphertext *tempCTs = new Ciphertext[hidden_units];
 		NTL_EXEC_RANGE(hidden_units, first, last)
 			for (long inputidx = first; inputidx < last; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
@@ -2514,11 +2714,19 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-
-				scheme.addAndEqual(outputCT, tempCT);
+				tempCTs[i].copy(tempCT);
 				tempCT.free();
 			}
-			NTL_EXEC_RANGE_END
+		NTL_EXEC_RANGE_END
+
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+				tempCTs[inputidx].free();
+		}
+		delete[] tempCTs;
+
+
+			
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
