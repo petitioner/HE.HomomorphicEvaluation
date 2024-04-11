@@ -434,8 +434,7 @@ void MyMethods::NNover30() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -453,15 +452,9 @@ void MyMethods::NNover30() {
 		ctxx = scheme.multByConst(ctxx, NNdate[9][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[7][0]);
@@ -473,6 +466,17 @@ void MyMethods::NNover30() {
 		ctx.free();
 		ctxx.free();
 	}
+
+	cout << endl << "// Input > Layer1 > Layer2" << endl;
+	timeutils.start("Decrypt batch");
+	auto dvec2 = scheme.decrypt(secretKey, outputCTs[0]);
+	timeutils.stop("Decrypt batch");
+
+	cout << endl << endl << endl << "SDFS:" << endl;
+	for (long i = 0; i < slots; ++i)
+		cout << dvec2[i] << ",\t";
+	cout << endl << endl << endl;
+
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3
@@ -517,8 +521,7 @@ void MyMethods::NNover30() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -536,15 +539,9 @@ void MyMethods::NNover30() {
 		ctxx = scheme.multByConst(ctxx, NNdate[14][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[12][0]);
@@ -556,6 +553,16 @@ void MyMethods::NNover30() {
 		ctx.free();
 		ctxx.free();
 	}
+
+	cout << endl << "// Input > Layer1 > Layer2 > Layer3" << endl;
+	timeutils.start("Decrypt batch");
+	auto dvec3 = scheme.decrypt(secretKey, outputCTs[0]);
+	timeutils.stop("Decrypt batch");
+
+	cout << endl << endl << endl << "SDFS:" << endl;
+	for (long i = 0; i < slots; ++i)
+		cout << dvec3[i] << ",\t";
+	cout << endl << endl << endl;
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 
@@ -600,8 +607,7 @@ void MyMethods::NNover30() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -619,15 +625,9 @@ void MyMethods::NNover30() {
 		ctxx = scheme.multByConst(ctxx, NNdate[19][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[17][0]);
@@ -639,6 +639,16 @@ void MyMethods::NNover30() {
 		ctx.free();
 		ctxx.free();
 	}
+
+	cout << endl << "// Input > Layer1 > Layer2 > Layer3 > Layer4" << endl;
+	timeutils.start("Decrypt batch");
+	auto dvec4 = scheme.decrypt(secretKey, outputCTs[0]);
+	timeutils.stop("Decrypt batch");
+
+	cout << endl << endl << endl << "SDFS:" << endl;
+	for (long i = 0; i < slots; ++i)
+		cout << dvec4[i] << ",\t";
+	cout << endl << endl << endl;
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 
@@ -683,8 +693,7 @@ void MyMethods::NNover30() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -702,15 +711,9 @@ void MyMethods::NNover30() {
 		ctxx = scheme.multByConst(ctxx, NNdate[24][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[22][0]);
@@ -722,6 +725,17 @@ void MyMethods::NNover30() {
 		ctx.free();
 		ctxx.free();
 	}
+
+	cout << endl << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5" << endl;
+	timeutils.start("Decrypt batch");
+	auto dvec5 = scheme.decrypt(secretKey, outputCTs[0]);
+	timeutils.stop("Decrypt batch");
+
+	cout << endl << endl << endl << "SDFS:" << endl;
+	for (long i = 0; i < slots; ++i)
+		cout << dvec5[i] << ",\t";
+	cout << endl << endl << endl;
+
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 
@@ -766,8 +780,7 @@ void MyMethods::NNover30() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -785,15 +798,9 @@ void MyMethods::NNover30() {
 		ctxx = scheme.multByConst(ctxx, NNdate[29][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[27][0]);
@@ -805,6 +812,18 @@ void MyMethods::NNover30() {
 		ctx.free();
 		ctxx.free();
 	}
+
+
+	cout << endl << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6" << endl;
+	timeutils.start("Decrypt batch");
+	auto dvec6 = scheme.decrypt(secretKey, outputCTs[0]);
+	timeutils.stop("Decrypt batch");
+
+	cout << endl << endl << endl << "SDFS:" << endl;
+	for (long i = 0; i < slots; ++i)
+		cout << dvec6[i] << ",\t";
+	cout << endl << endl << endl;
+
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 
@@ -849,8 +868,7 @@ void MyMethods::NNover30() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -868,15 +886,9 @@ void MyMethods::NNover30() {
 		ctxx = scheme.multByConst(ctxx, NNdate[34][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[32][0]);
@@ -888,6 +900,16 @@ void MyMethods::NNover30() {
 		ctx.free();
 		ctxx.free();
 	}
+
+	cout << endl << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7" << endl;
+	timeutils.start("Decrypt batch");
+	auto dvec7 = scheme.decrypt(secretKey, outputCTs[0]);
+	timeutils.stop("Decrypt batch");
+
+	cout << endl << endl << endl << "SDFS:" << endl;
+	for (long i = 0; i < slots; ++i)
+		cout << dvec7[i] << ",\t";
+	cout << endl << endl << endl;
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output
@@ -921,16 +943,11 @@ void MyMethods::NNover30() {
 
 	CTs[0].copy(resultCT);
 
-	cout << "NNdate[0][0]" << NNdate[0][0] << endl;
-
+	cout << endl << "END: Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output" << endl;
 	timeutils.start("Decrypt batch");
 	auto dvec1 = scheme.decrypt(secretKey, CTs[0]);
 	timeutils.stop("Decrypt batch");
 
-	cout << "+ NNdate[1][0]" << NNdate[1][0] << endl;
-	cout << "+ NNdate[3][0]" << NNdate[4][0] << endl;
-
-	cout << "+ NNdate[2][0]" << NNdate[2][0] << endl;
 	cout << endl << endl << endl << "SDFS:" << endl;
 	for (long i = 0; i < slots; ++i)
 		cout << dvec1[i] << ",\t";
@@ -1065,8 +1082,7 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -1084,15 +1100,9 @@ void MyMethods::NNover50() {
 		ctxx = scheme.multByConst(ctxx, NNdate[9][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[7][0]);
@@ -1148,8 +1158,7 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -1167,15 +1176,9 @@ void MyMethods::NNover50() {
 		ctxx = scheme.multByConst(ctxx, NNdate[14][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[12][0]);
@@ -1231,8 +1234,7 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -1250,15 +1252,9 @@ void MyMethods::NNover50() {
 		ctxx = scheme.multByConst(ctxx, NNdate[19][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[17][0]);
@@ -1314,8 +1310,7 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -1333,15 +1328,9 @@ void MyMethods::NNover50() {
 		ctxx = scheme.multByConst(ctxx, NNdate[24][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[22][0]);
@@ -1397,8 +1386,7 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -1416,15 +1404,9 @@ void MyMethods::NNover50() {
 		ctxx = scheme.multByConst(ctxx, NNdate[29][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[27][0]);
@@ -1480,8 +1462,7 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -1499,15 +1480,9 @@ void MyMethods::NNover50() {
 		ctxx = scheme.multByConst(ctxx, NNdate[34][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[32][0]);
@@ -1564,8 +1539,7 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -1583,15 +1557,9 @@ void MyMethods::NNover50() {
 		ctxx = scheme.multByConst(ctxx, NNdate[39][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[37][0]);
@@ -1649,8 +1617,7 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -1668,15 +1635,9 @@ void MyMethods::NNover50() {
 		ctxx = scheme.multByConst(ctxx, NNdate[44][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[42][0]);
@@ -1866,8 +1827,7 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -1885,15 +1845,9 @@ void MyMethods::NNover70() {
 		ctxx = scheme.multByConst(ctxx, NNdate[9][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[7][0]);
@@ -1949,8 +1903,7 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -1968,15 +1921,9 @@ void MyMethods::NNover70() {
 		ctxx = scheme.multByConst(ctxx, NNdate[14][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[12][0]);
@@ -2032,8 +1979,7 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -2051,15 +1997,9 @@ void MyMethods::NNover70() {
 		ctxx = scheme.multByConst(ctxx, NNdate[19][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[17][0]);
@@ -2115,8 +2055,7 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -2134,15 +2073,9 @@ void MyMethods::NNover70() {
 		ctxx = scheme.multByConst(ctxx, NNdate[24][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[22][0]);
@@ -2198,8 +2131,7 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -2217,15 +2149,9 @@ void MyMethods::NNover70() {
 		ctxx = scheme.multByConst(ctxx, NNdate[29][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[27][0]);
@@ -2281,8 +2207,7 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -2300,15 +2225,9 @@ void MyMethods::NNover70() {
 		ctxx = scheme.multByConst(ctxx, NNdate[34][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[32][0]);
@@ -2365,8 +2284,7 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -2384,15 +2302,9 @@ void MyMethods::NNover70() {
 		ctxx = scheme.multByConst(ctxx, NNdate[39][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[37][0]);
@@ -2450,8 +2362,7 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -2469,15 +2380,9 @@ void MyMethods::NNover70() {
 		ctxx = scheme.multByConst(ctxx, NNdate[44][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[42][0]);
@@ -2534,8 +2439,7 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -2553,15 +2457,9 @@ void MyMethods::NNover70() {
 		ctxx = scheme.multByConst(ctxx, NNdate[49][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[47][0]);
@@ -2617,8 +2515,7 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
-				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
 			}
@@ -2636,15 +2533,9 @@ void MyMethods::NNover70() {
 		ctxx = scheme.multByConst(ctxx, NNdate[54][0], logp);
 		ctxx.reScaleByAndEqual(logp);
 
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		ctx.modDownToAndEqual(ctxx.logq);
-		cout << "ctx.logp" << ctx.logp << endl;
-		cout << "ctxx.logp" << ctxx.logp << endl;
-		cout << "ctx.logq" << ctx.logq << endl;
-		cout << "ctxx.logq" << ctxx.logq << endl;
+
 		scheme.addAndEqual(ctxx, ctx);
 
 		scheme.addConstAndEqual(ctxx, NNdate[52][0]);
@@ -2706,4 +2597,3 @@ void MyMethods::NNover70() {
 	cout << endl << endl << endl;
 
 }
-
