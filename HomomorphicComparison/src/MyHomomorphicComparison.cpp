@@ -16,13 +16,13 @@ int main(int argc, char **argv) {
 
 	SetNumThreads(4);
 
-		MyMethods::testSine();
+		//MyMethods::testSine();
 
-		MyMethods::Sigmoid28();
+		//MyMethods::Sigmoid28();
 
-		//MyMethods::Sigmoid100();//failed 
+		/////////////////MyMethods::Sigmoid100();//failed 
 
-		MyMethods::NNover30();
+		//MyMethods::NNover30();
 
 		MyMethods::NNover50();
 
