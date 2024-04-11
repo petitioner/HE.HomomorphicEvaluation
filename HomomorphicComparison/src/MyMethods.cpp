@@ -316,7 +316,7 @@ void MyMethods::NNover30() {
 	long logN = 15;
 	long logQ = 1200;
 	long logp = 45;
-	long logSlots = 13;
+	long logSlots = 10;
 	long slots = (1 << logSlots);
 
 	TimeUtils timeutils;
@@ -347,10 +347,9 @@ void MyMethods::NNover30() {
 
 	auto mvec1 = EvaluatorUtils::randomRealArray(slots);
 	for (long i = 0; i < slots; ++i) {
-		mvec1[i] = -30 + 0.01 * i;
-		if (mvec1[i] > 30)
-			mvec1[i] = 0.0;
-		cout << mvec1[i] << "\t";
+		mvec1[i] = -30 + 0.1 * i;
+		if (mvec1[i] > 30) mvec1[i] = 0.0;
+cout << mvec1[i] << "\t";
 	}
 
 	timeutils.start("Encrypt one batch");
