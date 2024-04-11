@@ -14,6 +14,10 @@ public:
 
 	static void NNover30();
 
+	static void NNover50();
+
+	static void NNover70();
+
 
 
 };

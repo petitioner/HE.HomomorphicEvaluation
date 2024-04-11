@@ -323,7 +323,7 @@ void MyMethods::NNover30() {
 	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, logN, logQ);
 
-	SetNumThreads(1);
+	////////////////////////////////////////////////////// SetNumThreads(1);
 
 	srand(time(NULL));
 
@@ -918,6 +918,1775 @@ void MyMethods::NNover30() {
 	scheme.addConstAndEqual(resultCT, NNdate[36][0]);
 
 // END: Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output
+
+	CTs[0].copy(resultCT);
+
+	cout << "NNdate[0][0]" << NNdate[0][0] << endl;
+
+	timeutils.start("Decrypt batch");
+	auto dvec1 = scheme.decrypt(secretKey, CTs[0]);
+	timeutils.stop("Decrypt batch");
+
+	cout << "+ NNdate[1][0]" << NNdate[1][0] << endl;
+	cout << "+ NNdate[3][0]" << NNdate[4][0] << endl;
+
+	cout << "+ NNdate[2][0]" << NNdate[2][0] << endl;
+	cout << endl << endl << endl << "SDFS:" << endl;
+	for (long i = 0; i < slots; ++i)
+		cout << dvec1[i] << ",\t";
+	cout << endl << endl << endl;
+
+}
+
+
+
+
+void MyMethods::NNover50() {
+
+	cout << endl << endl << endl << "void MyMethods::NNover50() {" << endl
+			<< endl << endl;
+
+	long logN = 15;
+	long logQ = 1200;
+	long logp = 40;
+	long logSlots = 14;
+	long slots = (1 << logSlots);
+
+	TimeUtils timeutils;
+	SecretKey secretKey(logN);
+	Scheme scheme(secretKey, logN, logQ);
+
+	srand(time(NULL));
+
+	string NNweightsfile = "../data/[50]L9N128_quantized_model_weights.csv";
+	long hidden_units = 128;
+
+	long nnWeightsLen = 0;
+	long *nnWeightsDims;
+
+	double **NNdate = MyTools::dataFromNNweightsFile(NNweightsfile,
+			nnWeightsLen, nnWeightsDims);
+	cout << endl << nnWeightsLen << endl;
+	for (int i = 0; i < nnWeightsLen; i++) {
+		cout << nnWeightsDims[i] << "  ";
+		for (int j = 0; j < (nnWeightsDims[i] < 12 ? nnWeightsDims[i] : 12);
+				j++)
+			cout << NNdate[i][j] << "  ";
+		cout << endl;
+	}
+	cout << endl;
+
+	auto mvec1 = EvaluatorUtils::randomRealArray(slots);
+	for (long i = 0; i < slots; ++i) {
+		mvec1[i] = -50 + 0.01 * i;
+		if (mvec1[i] > 50)
+			mvec1[i] = 0.0;
+		cout << mvec1[i] << "\t";
+	}
+
+	timeutils.start("Encrypt one batch");
+	Ciphertext cipher1 = scheme.encrypt(mvec1, slots, logp, logQ);
+	timeutils.stop("Encrypt one batch");
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1
+	Ciphertext *CTs = new Ciphertext[hidden_units];
+	NTL_EXEC_RANGE(hidden_units, first, last)
+		for (long i = first; i < last; ++i) {
+			CTs[i].copy(cipher1);
+
+			CTs[i] = scheme.multByConst(CTs[i], NNdate[0][i], logp);
+
+			CTs[i].reScaleByAndEqual(logp);
+
+			scheme.addConstAndEqual(CTs[i], NNdate[1][i]);
+
+			Ciphertext ctx; ctx.copy(CTs[i]);
+			Ciphertext ctxx; ctxx = scheme.mult(ctx, ctx);
+			ctxx.reScaleByAndEqual(logp);
+
+			ctx = scheme.multByConst(ctx, NNdate[3][0], logp);
+			ctx.reScaleByAndEqual(logp);
+
+			ctxx = scheme.multByConst(ctxx, NNdate[4][0], logp);
+			ctxx.reScaleByAndEqual(logp);
+
+			ctx.modDownToAndEqual(ctxx.logq);
+
+			scheme.addAndEqual(ctxx, ctx);
+
+			scheme.addConstAndEqual(ctxx, NNdate[2][0]);
+
+			CTs[i].copy(ctxx);
+
+			ctx.free();
+			ctxx.free();
+
+		}
+		NTL_EXEC_RANGE_END
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2
+	double **wmatrix = new double*[hidden_units];
+	cout << endl << "wmatrix: " << endl;
+	for (int i = 0; i < hidden_units; ++i) {
+		wmatrix[i] = new double[hidden_units]();
+		for (int j = 0; j < hidden_units; ++j) {
+			wmatrix[i][j] = NNdate[5][i * hidden_units + j];
+			cout << wmatrix[i][j] << "\t";
+		}
+		cout << endl << endl;
+	}
+	double *bvector = new double[hidden_units]();
+	cout << endl << "bvector: " << endl;
+	for (long i = 0; i < hidden_units; ++i) {
+		bvector[i] = NNdate[6][i];
+		cout << bvector[i] << "\t";
+	}
+	Ciphertext *outputCTs = new Ciphertext[hidden_units];
+	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
+		auto mvec = EvaluatorUtils::randomRealArray(slots);
+		for (long i = 0; i < slots; ++i) {
+			mvec[i] = bvector[outputidx];
+		}
+		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
+		delete[] mvec;
+
+		NTL_EXEC_RANGE(hidden_units, first, last)
+			for (long inputidx = first; inputidx < last; ++inputidx) {
+				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+				tempCT.reScaleByAndEqual(logp);
+				if (outputCT.logp > tempCT.logp)
+				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
+				if (outputCT.logp < tempCT.logp)
+				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
+				if (outputCT.logq > tempCT.logq)
+				outputCT.modDownToAndEqual(tempCT.logq);
+				if (outputCT.logq < tempCT.logq)
+				tempCT.modDownToAndEqual(outputCT.logq);
+
+				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
+				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+				scheme.addAndEqual(outputCT, tempCT);
+				tempCT.free();
+			}
+			NTL_EXEC_RANGE_END
+
+		Ciphertext ctx;
+		ctx.copy(outputCT);
+		Ciphertext ctxx;
+		ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[8][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[9][0], logp);
+		ctxx.reScaleByAndEqual(logp);
+
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		ctx.modDownToAndEqual(ctxx.logq);
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConstAndEqual(ctxx, NNdate[7][0]);
+
+		outputCT.copy(ctxx);
+		outputCTs[outputidx].copy(outputCT);
+		outputCT.free();
+
+		ctx.free();
+		ctxx.free();
+	}
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3
+	for (long i = 0; i < hidden_units; ++i)
+		CTs[i].copy(outputCTs[i]);
+
+	wmatrix = new double*[hidden_units];
+	cout << endl << "wmatrix: " << endl;
+	for (int i = 0; i < hidden_units; ++i) {
+		wmatrix[i] = new double[hidden_units]();
+		for (int j = 0; j < hidden_units; ++j) {
+			wmatrix[i][j] = NNdate[10][i * hidden_units + j];
+			cout << wmatrix[i][j] << "\t";
+		}
+		cout << endl << endl;
+	}
+	bvector = new double[hidden_units]();
+	cout << endl << "bvector: " << endl;
+	for (long i = 0; i < hidden_units; ++i) {
+		bvector[i] = NNdate[11][i];
+		cout << bvector[i] << "\t";
+	}
+	outputCTs = new Ciphertext[hidden_units];
+	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
+		auto mvec = EvaluatorUtils::randomRealArray(slots);
+		for (long i = 0; i < slots; ++i) {
+			mvec[i] = bvector[outputidx];
+		}
+		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
+		delete[] mvec;
+
+		NTL_EXEC_RANGE(hidden_units, first, last)
+			for (long inputidx = first; inputidx < last; ++inputidx) {
+				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+				tempCT.reScaleByAndEqual(logp);
+				if (outputCT.logp > tempCT.logp)
+				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
+				if (outputCT.logp < tempCT.logp)
+				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
+				if (outputCT.logq > tempCT.logq)
+				outputCT.modDownToAndEqual(tempCT.logq);
+				if (outputCT.logq < tempCT.logq)
+				tempCT.modDownToAndEqual(outputCT.logq);
+
+				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
+				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+				scheme.addAndEqual(outputCT, tempCT);
+				tempCT.free();
+			}
+			NTL_EXEC_RANGE_END
+
+		Ciphertext ctx;
+		ctx.copy(outputCT);
+		Ciphertext ctxx;
+		ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[13][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[14][0], logp);
+		ctxx.reScaleByAndEqual(logp);
+
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		ctx.modDownToAndEqual(ctxx.logq);
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConstAndEqual(ctxx, NNdate[12][0]);
+
+		outputCT.copy(ctxx);
+		outputCTs[outputidx].copy(outputCT);
+		outputCT.free();
+
+		ctx.free();
+		ctxx.free();
+	}
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 
+	for (long i = 0; i < hidden_units; ++i)
+		CTs[i].copy(outputCTs[i]);
+
+	wmatrix = new double*[hidden_units];
+	cout << endl << "wmatrix: " << endl;
+	for (int i = 0; i < hidden_units; ++i) {
+		wmatrix[i] = new double[hidden_units]();
+		for (int j = 0; j < hidden_units; ++j) {
+			wmatrix[i][j] = NNdate[15][i * hidden_units + j];
+			cout << wmatrix[i][j] << "\t";
+		}
+		cout << endl << endl;
+	}
+	bvector = new double[hidden_units]();
+	cout << endl << "bvector: " << endl;
+	for (long i = 0; i < hidden_units; ++i) {
+		bvector[i] = NNdate[16][i];
+		cout << bvector[i] << "\t";
+	}
+	outputCTs = new Ciphertext[hidden_units];
+	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
+		auto mvec = EvaluatorUtils::randomRealArray(slots);
+		for (long i = 0; i < slots; ++i) {
+			mvec[i] = bvector[outputidx];
+		}
+		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
+		delete[] mvec;
+
+		NTL_EXEC_RANGE(hidden_units, first, last)
+			for (long inputidx = first; inputidx < last; ++inputidx) {
+				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+				tempCT.reScaleByAndEqual(logp);
+				if (outputCT.logp > tempCT.logp)
+				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
+				if (outputCT.logp < tempCT.logp)
+				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
+				if (outputCT.logq > tempCT.logq)
+				outputCT.modDownToAndEqual(tempCT.logq);
+				if (outputCT.logq < tempCT.logq)
+				tempCT.modDownToAndEqual(outputCT.logq);
+
+				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
+				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+				scheme.addAndEqual(outputCT, tempCT);
+				tempCT.free();
+			}
+			NTL_EXEC_RANGE_END
+
+		Ciphertext ctx;
+		ctx.copy(outputCT);
+		Ciphertext ctxx;
+		ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[18][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[19][0], logp);
+		ctxx.reScaleByAndEqual(logp);
+
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		ctx.modDownToAndEqual(ctxx.logq);
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConstAndEqual(ctxx, NNdate[17][0]);
+
+		outputCT.copy(ctxx);
+		outputCTs[outputidx].copy(outputCT);
+		outputCT.free();
+
+		ctx.free();
+		ctxx.free();
+	}
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 
+	for (long i = 0; i < hidden_units; ++i)
+		CTs[i].copy(outputCTs[i]);
+
+	wmatrix = new double*[hidden_units];
+	cout << endl << "wmatrix: " << endl;
+	for (int i = 0; i < hidden_units; ++i) {
+		wmatrix[i] = new double[hidden_units]();
+		for (int j = 0; j < hidden_units; ++j) {
+			wmatrix[i][j] = NNdate[20][i * hidden_units + j];
+			cout << wmatrix[i][j] << "\t";
+		}
+		cout << endl << endl;
+	}
+	bvector = new double[hidden_units]();
+	cout << endl << "bvector: " << endl;
+	for (long i = 0; i < hidden_units; ++i) {
+		bvector[i] = NNdate[21][i];
+		cout << bvector[i] << "\t";
+	}
+	outputCTs = new Ciphertext[hidden_units];
+	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
+		auto mvec = EvaluatorUtils::randomRealArray(slots);
+		for (long i = 0; i < slots; ++i) {
+			mvec[i] = bvector[outputidx];
+		}
+		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
+		delete[] mvec;
+
+		NTL_EXEC_RANGE(hidden_units, first, last)
+			for (long inputidx = first; inputidx < last; ++inputidx) {
+				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+				tempCT.reScaleByAndEqual(logp);
+				if (outputCT.logp > tempCT.logp)
+				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
+				if (outputCT.logp < tempCT.logp)
+				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
+				if (outputCT.logq > tempCT.logq)
+				outputCT.modDownToAndEqual(tempCT.logq);
+				if (outputCT.logq < tempCT.logq)
+				tempCT.modDownToAndEqual(outputCT.logq);
+
+				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
+				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+				scheme.addAndEqual(outputCT, tempCT);
+				tempCT.free();
+			}
+			NTL_EXEC_RANGE_END
+
+		Ciphertext ctx;
+		ctx.copy(outputCT);
+		Ciphertext ctxx;
+		ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[23][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[24][0], logp);
+		ctxx.reScaleByAndEqual(logp);
+
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		ctx.modDownToAndEqual(ctxx.logq);
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConstAndEqual(ctxx, NNdate[22][0]);
+
+		outputCT.copy(ctxx);
+		outputCTs[outputidx].copy(outputCT);
+		outputCT.free();
+
+		ctx.free();
+		ctxx.free();
+	}
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 
+	for (long i = 0; i < hidden_units; ++i)
+		CTs[i].copy(outputCTs[i]);
+
+	wmatrix = new double*[hidden_units];
+	cout << endl << "wmatrix: " << endl;
+	for (int i = 0; i < hidden_units; ++i) {
+		wmatrix[i] = new double[hidden_units]();
+		for (int j = 0; j < hidden_units; ++j) {
+			wmatrix[i][j] = NNdate[25][i * hidden_units + j];
+			cout << wmatrix[i][j] << "\t";
+		}
+		cout << endl << endl;
+	}
+	bvector = new double[hidden_units]();
+	cout << endl << "bvector: " << endl;
+	for (long i = 0; i < hidden_units; ++i) {
+		bvector[i] = NNdate[26][i];
+		cout << bvector[i] << "\t";
+	}
+	outputCTs = new Ciphertext[hidden_units];
+	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
+		auto mvec = EvaluatorUtils::randomRealArray(slots);
+		for (long i = 0; i < slots; ++i) {
+			mvec[i] = bvector[outputidx];
+		}
+		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
+		delete[] mvec;
+
+		NTL_EXEC_RANGE(hidden_units, first, last)
+			for (long inputidx = first; inputidx < last; ++inputidx) {
+				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+				tempCT.reScaleByAndEqual(logp);
+				if (outputCT.logp > tempCT.logp)
+				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
+				if (outputCT.logp < tempCT.logp)
+				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
+				if (outputCT.logq > tempCT.logq)
+				outputCT.modDownToAndEqual(tempCT.logq);
+				if (outputCT.logq < tempCT.logq)
+				tempCT.modDownToAndEqual(outputCT.logq);
+
+				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
+				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+				scheme.addAndEqual(outputCT, tempCT);
+				tempCT.free();
+			}
+			NTL_EXEC_RANGE_END
+
+		Ciphertext ctx;
+		ctx.copy(outputCT);
+		Ciphertext ctxx;
+		ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[28][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[29][0], logp);
+		ctxx.reScaleByAndEqual(logp);
+
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		ctx.modDownToAndEqual(ctxx.logq);
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConstAndEqual(ctxx, NNdate[27][0]);
+
+		outputCT.copy(ctxx);
+		outputCTs[outputidx].copy(outputCT);
+		outputCT.free();
+
+		ctx.free();
+		ctxx.free();
+	}
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 
+	for (long i = 0; i < hidden_units; ++i)
+		CTs[i].copy(outputCTs[i]);
+
+	wmatrix = new double*[hidden_units];
+	cout << endl << "wmatrix: " << endl;
+	for (int i = 0; i < hidden_units; ++i) {
+		wmatrix[i] = new double[hidden_units]();
+		for (int j = 0; j < hidden_units; ++j) {
+			wmatrix[i][j] = NNdate[30][i * hidden_units + j];
+			cout << wmatrix[i][j] << "\t";
+		}
+		cout << endl << endl;
+	}
+	bvector = new double[hidden_units]();
+	cout << endl << "bvector: " << endl;
+	for (long i = 0; i < hidden_units; ++i) {
+		bvector[i] = NNdate[31][i];
+		cout << bvector[i] << "\t";
+	}
+	outputCTs = new Ciphertext[hidden_units];
+	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
+		auto mvec = EvaluatorUtils::randomRealArray(slots);
+		for (long i = 0; i < slots; ++i) {
+			mvec[i] = bvector[outputidx];
+		}
+		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
+		delete[] mvec;
+
+		NTL_EXEC_RANGE(hidden_units, first, last)
+			for (long inputidx = first; inputidx < last; ++inputidx) {
+				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+				tempCT.reScaleByAndEqual(logp);
+				if (outputCT.logp > tempCT.logp)
+				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
+				if (outputCT.logp < tempCT.logp)
+				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
+				if (outputCT.logq > tempCT.logq)
+				outputCT.modDownToAndEqual(tempCT.logq);
+				if (outputCT.logq < tempCT.logq)
+				tempCT.modDownToAndEqual(outputCT.logq);
+
+				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
+				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+				scheme.addAndEqual(outputCT, tempCT);
+				tempCT.free();
+			}
+			NTL_EXEC_RANGE_END
+
+		Ciphertext ctx;
+		ctx.copy(outputCT);
+		Ciphertext ctxx;
+		ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[33][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[34][0], logp);
+		ctxx.reScaleByAndEqual(logp);
+
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		ctx.modDownToAndEqual(ctxx.logq);
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConstAndEqual(ctxx, NNdate[32][0]);
+
+		outputCT.copy(ctxx);
+		outputCTs[outputidx].copy(outputCT);
+		outputCT.free();
+
+		ctx.free();
+		ctxx.free();
+	}
+
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 
+	for (long i = 0; i < hidden_units; ++i)
+		CTs[i].copy(outputCTs[i]);
+
+	wmatrix = new double*[hidden_units];
+	cout << endl << "wmatrix: " << endl;
+	for (int i = 0; i < hidden_units; ++i) {
+		wmatrix[i] = new double[hidden_units]();
+		for (int j = 0; j < hidden_units; ++j) {
+			wmatrix[i][j] = NNdate[35][i * hidden_units + j];
+			cout << wmatrix[i][j] << "\t";
+		}
+		cout << endl << endl;
+	}
+	bvector = new double[hidden_units]();
+	cout << endl << "bvector: " << endl;
+	for (long i = 0; i < hidden_units; ++i) {
+		bvector[i] = NNdate[36][i];
+		cout << bvector[i] << "\t";
+	}
+	outputCTs = new Ciphertext[hidden_units];
+	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
+		auto mvec = EvaluatorUtils::randomRealArray(slots);
+		for (long i = 0; i < slots; ++i) {
+			mvec[i] = bvector[outputidx];
+		}
+		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
+		delete[] mvec;
+
+		NTL_EXEC_RANGE(hidden_units, first, last)
+			for (long inputidx = first; inputidx < last; ++inputidx) {
+				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+				tempCT.reScaleByAndEqual(logp);
+				if (outputCT.logp > tempCT.logp)
+				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
+				if (outputCT.logp < tempCT.logp)
+				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
+				if (outputCT.logq > tempCT.logq)
+				outputCT.modDownToAndEqual(tempCT.logq);
+				if (outputCT.logq < tempCT.logq)
+				tempCT.modDownToAndEqual(outputCT.logq);
+
+				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
+				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+				scheme.addAndEqual(outputCT, tempCT);
+				tempCT.free();
+			}
+			NTL_EXEC_RANGE_END
+
+		Ciphertext ctx;
+		ctx.copy(outputCT);
+		Ciphertext ctxx;
+		ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[38][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[39][0], logp);
+		ctxx.reScaleByAndEqual(logp);
+
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		ctx.modDownToAndEqual(ctxx.logq);
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConstAndEqual(ctxx, NNdate[37][0]);
+
+		outputCT.copy(ctxx);
+		outputCTs[outputidx].copy(outputCT);
+		outputCT.free();
+
+		ctx.free();
+		ctxx.free();
+	}
+
+
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 
+	for (long i = 0; i < hidden_units; ++i)
+		CTs[i].copy(outputCTs[i]);
+
+	wmatrix = new double*[hidden_units];
+	cout << endl << "wmatrix: " << endl;
+	for (int i = 0; i < hidden_units; ++i) {
+		wmatrix[i] = new double[hidden_units]();
+		for (int j = 0; j < hidden_units; ++j) {
+			wmatrix[i][j] = NNdate[40][i * hidden_units + j];
+			cout << wmatrix[i][j] << "\t";
+		}
+		cout << endl << endl;
+	}
+	bvector = new double[hidden_units]();
+	cout << endl << "bvector: " << endl;
+	for (long i = 0; i < hidden_units; ++i) {
+		bvector[i] = NNdate[41][i];
+		cout << bvector[i] << "\t";
+	}
+	outputCTs = new Ciphertext[hidden_units];
+	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
+		auto mvec = EvaluatorUtils::randomRealArray(slots);
+		for (long i = 0; i < slots; ++i) {
+			mvec[i] = bvector[outputidx];
+		}
+		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
+		delete[] mvec;
+
+		NTL_EXEC_RANGE(hidden_units, first, last)
+			for (long inputidx = first; inputidx < last; ++inputidx) {
+				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+				tempCT.reScaleByAndEqual(logp);
+				if (outputCT.logp > tempCT.logp)
+				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
+				if (outputCT.logp < tempCT.logp)
+				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
+				if (outputCT.logq > tempCT.logq)
+				outputCT.modDownToAndEqual(tempCT.logq);
+				if (outputCT.logq < tempCT.logq)
+				tempCT.modDownToAndEqual(outputCT.logq);
+
+				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
+				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+				scheme.addAndEqual(outputCT, tempCT);
+				tempCT.free();
+			}
+			NTL_EXEC_RANGE_END
+
+		Ciphertext ctx;
+		ctx.copy(outputCT);
+		Ciphertext ctxx;
+		ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[43][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[44][0], logp);
+		ctxx.reScaleByAndEqual(logp);
+
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		ctx.modDownToAndEqual(ctxx.logq);
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConstAndEqual(ctxx, NNdate[42][0]);
+
+		outputCT.copy(ctxx);
+		outputCTs[outputidx].copy(outputCT);
+		outputCT.free();
+
+		ctx.free();
+		ctxx.free();
+	}
+
+
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Output 
+	auto mres = EvaluatorUtils::randomRealArray(slots);
+	for (long i = 0; i < slots; ++i) {
+		mres[i] = 0;
+	}
+	auto resultCT = scheme.encrypt(mres, slots, outputCTs[0].logp,
+			outputCTs[0].logq);
+
+	for (long i = 0; i < hidden_units; ++i) {
+
+		outputCTs[i] = scheme.multByConst(outputCTs[i], NNdate[45][i], logp);
+
+		outputCTs[i].reScaleByAndEqual(logp);
+
+		if (resultCT.logp > outputCTs[i].logp)
+			resultCT.reScaleByAndEqual(resultCT.logp - outputCTs[i].logp);
+		if (resultCT.logp < outputCTs[i].logp)
+			outputCTs[i].reScaleByAndEqual(outputCTs[i].logp - resultCT.logp);
+		if (resultCT.logq > outputCTs[i].logq)
+			resultCT.modDownToAndEqual(outputCTs[i].logq);
+		if (resultCT.logq < outputCTs[i].logq)
+			outputCTs[i].modDownToAndEqual(resultCT.logq);
+		scheme.addAndEqual(resultCT, outputCTs[i]);
+
+	}
+	scheme.addConstAndEqual(resultCT, NNdate[46][0]);
+
+// END: Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Output 
+
+	CTs[0].copy(resultCT);
+
+	cout << "NNdate[0][0]" << NNdate[0][0] << endl;
+
+	timeutils.start("Decrypt batch");
+	auto dvec1 = scheme.decrypt(secretKey, CTs[0]);
+	timeutils.stop("Decrypt batch");
+
+	cout << "+ NNdate[1][0]" << NNdate[1][0] << endl;
+	cout << "+ NNdate[3][0]" << NNdate[4][0] << endl;
+
+	cout << "+ NNdate[2][0]" << NNdate[2][0] << endl;
+	cout << endl << endl << endl << "SDFS:" << endl;
+	for (long i = 0; i < slots; ++i)
+		cout << dvec1[i] << ",\t";
+	cout << endl << endl << endl;
+
+}
+
+
+
+void MyMethods::NNover70() {
+
+	cout << endl << endl << endl << "void MyMethods::NNover70() {" << endl
+			<< endl << endl;
+
+	long logN = 15;
+	long logQ = 1200;
+	long logp = 30;
+	long logSlots = 14;
+	long slots = (1 << logSlots);
+
+	TimeUtils timeutils;
+	SecretKey secretKey(logN);
+	Scheme scheme(secretKey, logN, logQ);
+
+	srand(time(NULL));
+
+	string NNweightsfile = "../data/[70]L11N128_quantized_model_weights.csv";
+	long hidden_units = 128;
+
+	long nnWeightsLen = 0;
+	long *nnWeightsDims;
+
+	double **NNdate = MyTools::dataFromNNweightsFile(NNweightsfile,
+			nnWeightsLen, nnWeightsDims);
+	cout << endl << nnWeightsLen << endl;
+	for (int i = 0; i < nnWeightsLen; i++) {
+		cout << nnWeightsDims[i] << "  ";
+		for (int j = 0; j < (nnWeightsDims[i] < 12 ? nnWeightsDims[i] : 12);
+				j++)
+			cout << NNdate[i][j] << "  ";
+		cout << endl;
+	}
+	cout << endl;
+
+	auto mvec1 = EvaluatorUtils::randomRealArray(slots);
+	for (long i = 0; i < slots; ++i) {
+		mvec1[i] = -70 + 0.01 * i;
+		if (mvec1[i] > 70)
+			mvec1[i] = 0.0;
+		cout << mvec1[i] << "\t";
+	}
+
+	timeutils.start("Encrypt one batch");
+	Ciphertext cipher1 = scheme.encrypt(mvec1, slots, logp, logQ);
+	timeutils.stop("Encrypt one batch");
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1
+	Ciphertext *CTs = new Ciphertext[hidden_units];
+	NTL_EXEC_RANGE(hidden_units, first, last)
+		for (long i = first; i < last; ++i) {
+			CTs[i].copy(cipher1);
+
+			CTs[i] = scheme.multByConst(CTs[i], NNdate[0][i], logp);
+
+			CTs[i].reScaleByAndEqual(logp);
+
+			scheme.addConstAndEqual(CTs[i], NNdate[1][i]);
+
+			Ciphertext ctx; ctx.copy(CTs[i]);
+			Ciphertext ctxx; ctxx = scheme.mult(ctx, ctx);
+			ctxx.reScaleByAndEqual(logp);
+
+			ctx = scheme.multByConst(ctx, NNdate[3][0], logp);
+			ctx.reScaleByAndEqual(logp);
+
+			ctxx = scheme.multByConst(ctxx, NNdate[4][0], logp);
+			ctxx.reScaleByAndEqual(logp);
+
+			ctx.modDownToAndEqual(ctxx.logq);
+
+			scheme.addAndEqual(ctxx, ctx);
+
+			scheme.addConstAndEqual(ctxx, NNdate[2][0]);
+
+			CTs[i].copy(ctxx);
+
+			ctx.free();
+			ctxx.free();
+
+		}
+		NTL_EXEC_RANGE_END
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2
+	double **wmatrix = new double*[hidden_units];
+	cout << endl << "wmatrix: " << endl;
+	for (int i = 0; i < hidden_units; ++i) {
+		wmatrix[i] = new double[hidden_units]();
+		for (int j = 0; j < hidden_units; ++j) {
+			wmatrix[i][j] = NNdate[5][i * hidden_units + j];
+			cout << wmatrix[i][j] << "\t";
+		}
+		cout << endl << endl;
+	}
+	double *bvector = new double[hidden_units]();
+	cout << endl << "bvector: " << endl;
+	for (long i = 0; i < hidden_units; ++i) {
+		bvector[i] = NNdate[6][i];
+		cout << bvector[i] << "\t";
+	}
+	Ciphertext *outputCTs = new Ciphertext[hidden_units];
+	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
+		auto mvec = EvaluatorUtils::randomRealArray(slots);
+		for (long i = 0; i < slots; ++i) {
+			mvec[i] = bvector[outputidx];
+		}
+		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
+		delete[] mvec;
+
+		NTL_EXEC_RANGE(hidden_units, first, last)
+			for (long inputidx = first; inputidx < last; ++inputidx) {
+				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+				tempCT.reScaleByAndEqual(logp);
+				if (outputCT.logp > tempCT.logp)
+				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
+				if (outputCT.logp < tempCT.logp)
+				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
+				if (outputCT.logq > tempCT.logq)
+				outputCT.modDownToAndEqual(tempCT.logq);
+				if (outputCT.logq < tempCT.logq)
+				tempCT.modDownToAndEqual(outputCT.logq);
+
+				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
+				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+				scheme.addAndEqual(outputCT, tempCT);
+				tempCT.free();
+			}
+			NTL_EXEC_RANGE_END
+
+		Ciphertext ctx;
+		ctx.copy(outputCT);
+		Ciphertext ctxx;
+		ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[8][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[9][0], logp);
+		ctxx.reScaleByAndEqual(logp);
+
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		ctx.modDownToAndEqual(ctxx.logq);
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConstAndEqual(ctxx, NNdate[7][0]);
+
+		outputCT.copy(ctxx);
+		outputCTs[outputidx].copy(outputCT);
+		outputCT.free();
+
+		ctx.free();
+		ctxx.free();
+	}
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3
+	for (long i = 0; i < hidden_units; ++i)
+		CTs[i].copy(outputCTs[i]);
+
+	wmatrix = new double*[hidden_units];
+	cout << endl << "wmatrix: " << endl;
+	for (int i = 0; i < hidden_units; ++i) {
+		wmatrix[i] = new double[hidden_units]();
+		for (int j = 0; j < hidden_units; ++j) {
+			wmatrix[i][j] = NNdate[10][i * hidden_units + j];
+			cout << wmatrix[i][j] << "\t";
+		}
+		cout << endl << endl;
+	}
+	bvector = new double[hidden_units]();
+	cout << endl << "bvector: " << endl;
+	for (long i = 0; i < hidden_units; ++i) {
+		bvector[i] = NNdate[11][i];
+		cout << bvector[i] << "\t";
+	}
+	outputCTs = new Ciphertext[hidden_units];
+	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
+		auto mvec = EvaluatorUtils::randomRealArray(slots);
+		for (long i = 0; i < slots; ++i) {
+			mvec[i] = bvector[outputidx];
+		}
+		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
+		delete[] mvec;
+
+		NTL_EXEC_RANGE(hidden_units, first, last)
+			for (long inputidx = first; inputidx < last; ++inputidx) {
+				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+				tempCT.reScaleByAndEqual(logp);
+				if (outputCT.logp > tempCT.logp)
+				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
+				if (outputCT.logp < tempCT.logp)
+				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
+				if (outputCT.logq > tempCT.logq)
+				outputCT.modDownToAndEqual(tempCT.logq);
+				if (outputCT.logq < tempCT.logq)
+				tempCT.modDownToAndEqual(outputCT.logq);
+
+				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
+				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+				scheme.addAndEqual(outputCT, tempCT);
+				tempCT.free();
+			}
+			NTL_EXEC_RANGE_END
+
+		Ciphertext ctx;
+		ctx.copy(outputCT);
+		Ciphertext ctxx;
+		ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[13][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[14][0], logp);
+		ctxx.reScaleByAndEqual(logp);
+
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		ctx.modDownToAndEqual(ctxx.logq);
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConstAndEqual(ctxx, NNdate[12][0]);
+
+		outputCT.copy(ctxx);
+		outputCTs[outputidx].copy(outputCT);
+		outputCT.free();
+
+		ctx.free();
+		ctxx.free();
+	}
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 
+	for (long i = 0; i < hidden_units; ++i)
+		CTs[i].copy(outputCTs[i]);
+
+	wmatrix = new double*[hidden_units];
+	cout << endl << "wmatrix: " << endl;
+	for (int i = 0; i < hidden_units; ++i) {
+		wmatrix[i] = new double[hidden_units]();
+		for (int j = 0; j < hidden_units; ++j) {
+			wmatrix[i][j] = NNdate[15][i * hidden_units + j];
+			cout << wmatrix[i][j] << "\t";
+		}
+		cout << endl << endl;
+	}
+	bvector = new double[hidden_units]();
+	cout << endl << "bvector: " << endl;
+	for (long i = 0; i < hidden_units; ++i) {
+		bvector[i] = NNdate[16][i];
+		cout << bvector[i] << "\t";
+	}
+	outputCTs = new Ciphertext[hidden_units];
+	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
+		auto mvec = EvaluatorUtils::randomRealArray(slots);
+		for (long i = 0; i < slots; ++i) {
+			mvec[i] = bvector[outputidx];
+		}
+		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
+		delete[] mvec;
+
+		NTL_EXEC_RANGE(hidden_units, first, last)
+			for (long inputidx = first; inputidx < last; ++inputidx) {
+				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+				tempCT.reScaleByAndEqual(logp);
+				if (outputCT.logp > tempCT.logp)
+				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
+				if (outputCT.logp < tempCT.logp)
+				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
+				if (outputCT.logq > tempCT.logq)
+				outputCT.modDownToAndEqual(tempCT.logq);
+				if (outputCT.logq < tempCT.logq)
+				tempCT.modDownToAndEqual(outputCT.logq);
+
+				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
+				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+				scheme.addAndEqual(outputCT, tempCT);
+				tempCT.free();
+			}
+			NTL_EXEC_RANGE_END
+
+		Ciphertext ctx;
+		ctx.copy(outputCT);
+		Ciphertext ctxx;
+		ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[18][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[19][0], logp);
+		ctxx.reScaleByAndEqual(logp);
+
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		ctx.modDownToAndEqual(ctxx.logq);
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConstAndEqual(ctxx, NNdate[17][0]);
+
+		outputCT.copy(ctxx);
+		outputCTs[outputidx].copy(outputCT);
+		outputCT.free();
+
+		ctx.free();
+		ctxx.free();
+	}
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 
+	for (long i = 0; i < hidden_units; ++i)
+		CTs[i].copy(outputCTs[i]);
+
+	wmatrix = new double*[hidden_units];
+	cout << endl << "wmatrix: " << endl;
+	for (int i = 0; i < hidden_units; ++i) {
+		wmatrix[i] = new double[hidden_units]();
+		for (int j = 0; j < hidden_units; ++j) {
+			wmatrix[i][j] = NNdate[20][i * hidden_units + j];
+			cout << wmatrix[i][j] << "\t";
+		}
+		cout << endl << endl;
+	}
+	bvector = new double[hidden_units]();
+	cout << endl << "bvector: " << endl;
+	for (long i = 0; i < hidden_units; ++i) {
+		bvector[i] = NNdate[21][i];
+		cout << bvector[i] << "\t";
+	}
+	outputCTs = new Ciphertext[hidden_units];
+	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
+		auto mvec = EvaluatorUtils::randomRealArray(slots);
+		for (long i = 0; i < slots; ++i) {
+			mvec[i] = bvector[outputidx];
+		}
+		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
+		delete[] mvec;
+
+		NTL_EXEC_RANGE(hidden_units, first, last)
+			for (long inputidx = first; inputidx < last; ++inputidx) {
+				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+				tempCT.reScaleByAndEqual(logp);
+				if (outputCT.logp > tempCT.logp)
+				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
+				if (outputCT.logp < tempCT.logp)
+				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
+				if (outputCT.logq > tempCT.logq)
+				outputCT.modDownToAndEqual(tempCT.logq);
+				if (outputCT.logq < tempCT.logq)
+				tempCT.modDownToAndEqual(outputCT.logq);
+
+				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
+				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+				scheme.addAndEqual(outputCT, tempCT);
+				tempCT.free();
+			}
+			NTL_EXEC_RANGE_END
+
+		Ciphertext ctx;
+		ctx.copy(outputCT);
+		Ciphertext ctxx;
+		ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[23][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[24][0], logp);
+		ctxx.reScaleByAndEqual(logp);
+
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		ctx.modDownToAndEqual(ctxx.logq);
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConstAndEqual(ctxx, NNdate[22][0]);
+
+		outputCT.copy(ctxx);
+		outputCTs[outputidx].copy(outputCT);
+		outputCT.free();
+
+		ctx.free();
+		ctxx.free();
+	}
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 
+	for (long i = 0; i < hidden_units; ++i)
+		CTs[i].copy(outputCTs[i]);
+
+	wmatrix = new double*[hidden_units];
+	cout << endl << "wmatrix: " << endl;
+	for (int i = 0; i < hidden_units; ++i) {
+		wmatrix[i] = new double[hidden_units]();
+		for (int j = 0; j < hidden_units; ++j) {
+			wmatrix[i][j] = NNdate[25][i * hidden_units + j];
+			cout << wmatrix[i][j] << "\t";
+		}
+		cout << endl << endl;
+	}
+	bvector = new double[hidden_units]();
+	cout << endl << "bvector: " << endl;
+	for (long i = 0; i < hidden_units; ++i) {
+		bvector[i] = NNdate[26][i];
+		cout << bvector[i] << "\t";
+	}
+	outputCTs = new Ciphertext[hidden_units];
+	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
+		auto mvec = EvaluatorUtils::randomRealArray(slots);
+		for (long i = 0; i < slots; ++i) {
+			mvec[i] = bvector[outputidx];
+		}
+		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
+		delete[] mvec;
+
+		NTL_EXEC_RANGE(hidden_units, first, last)
+			for (long inputidx = first; inputidx < last; ++inputidx) {
+				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+				tempCT.reScaleByAndEqual(logp);
+				if (outputCT.logp > tempCT.logp)
+				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
+				if (outputCT.logp < tempCT.logp)
+				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
+				if (outputCT.logq > tempCT.logq)
+				outputCT.modDownToAndEqual(tempCT.logq);
+				if (outputCT.logq < tempCT.logq)
+				tempCT.modDownToAndEqual(outputCT.logq);
+
+				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
+				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+				scheme.addAndEqual(outputCT, tempCT);
+				tempCT.free();
+			}
+			NTL_EXEC_RANGE_END
+
+		Ciphertext ctx;
+		ctx.copy(outputCT);
+		Ciphertext ctxx;
+		ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[28][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[29][0], logp);
+		ctxx.reScaleByAndEqual(logp);
+
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		ctx.modDownToAndEqual(ctxx.logq);
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConstAndEqual(ctxx, NNdate[27][0]);
+
+		outputCT.copy(ctxx);
+		outputCTs[outputidx].copy(outputCT);
+		outputCT.free();
+
+		ctx.free();
+		ctxx.free();
+	}
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 
+	for (long i = 0; i < hidden_units; ++i)
+		CTs[i].copy(outputCTs[i]);
+
+	wmatrix = new double*[hidden_units];
+	cout << endl << "wmatrix: " << endl;
+	for (int i = 0; i < hidden_units; ++i) {
+		wmatrix[i] = new double[hidden_units]();
+		for (int j = 0; j < hidden_units; ++j) {
+			wmatrix[i][j] = NNdate[30][i * hidden_units + j];
+			cout << wmatrix[i][j] << "\t";
+		}
+		cout << endl << endl;
+	}
+	bvector = new double[hidden_units]();
+	cout << endl << "bvector: " << endl;
+	for (long i = 0; i < hidden_units; ++i) {
+		bvector[i] = NNdate[31][i];
+		cout << bvector[i] << "\t";
+	}
+	outputCTs = new Ciphertext[hidden_units];
+	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
+		auto mvec = EvaluatorUtils::randomRealArray(slots);
+		for (long i = 0; i < slots; ++i) {
+			mvec[i] = bvector[outputidx];
+		}
+		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
+		delete[] mvec;
+
+		NTL_EXEC_RANGE(hidden_units, first, last)
+			for (long inputidx = first; inputidx < last; ++inputidx) {
+				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+				tempCT.reScaleByAndEqual(logp);
+				if (outputCT.logp > tempCT.logp)
+				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
+				if (outputCT.logp < tempCT.logp)
+				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
+				if (outputCT.logq > tempCT.logq)
+				outputCT.modDownToAndEqual(tempCT.logq);
+				if (outputCT.logq < tempCT.logq)
+				tempCT.modDownToAndEqual(outputCT.logq);
+
+				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
+				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+				scheme.addAndEqual(outputCT, tempCT);
+				tempCT.free();
+			}
+			NTL_EXEC_RANGE_END
+
+		Ciphertext ctx;
+		ctx.copy(outputCT);
+		Ciphertext ctxx;
+		ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[33][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[34][0], logp);
+		ctxx.reScaleByAndEqual(logp);
+
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		ctx.modDownToAndEqual(ctxx.logq);
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConstAndEqual(ctxx, NNdate[32][0]);
+
+		outputCT.copy(ctxx);
+		outputCTs[outputidx].copy(outputCT);
+		outputCT.free();
+
+		ctx.free();
+		ctxx.free();
+	}
+
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 
+	for (long i = 0; i < hidden_units; ++i)
+		CTs[i].copy(outputCTs[i]);
+
+	wmatrix = new double*[hidden_units];
+	cout << endl << "wmatrix: " << endl;
+	for (int i = 0; i < hidden_units; ++i) {
+		wmatrix[i] = new double[hidden_units]();
+		for (int j = 0; j < hidden_units; ++j) {
+			wmatrix[i][j] = NNdate[35][i * hidden_units + j];
+			cout << wmatrix[i][j] << "\t";
+		}
+		cout << endl << endl;
+	}
+	bvector = new double[hidden_units]();
+	cout << endl << "bvector: " << endl;
+	for (long i = 0; i < hidden_units; ++i) {
+		bvector[i] = NNdate[36][i];
+		cout << bvector[i] << "\t";
+	}
+	outputCTs = new Ciphertext[hidden_units];
+	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
+		auto mvec = EvaluatorUtils::randomRealArray(slots);
+		for (long i = 0; i < slots; ++i) {
+			mvec[i] = bvector[outputidx];
+		}
+		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
+		delete[] mvec;
+
+		NTL_EXEC_RANGE(hidden_units, first, last)
+			for (long inputidx = first; inputidx < last; ++inputidx) {
+				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+				tempCT.reScaleByAndEqual(logp);
+				if (outputCT.logp > tempCT.logp)
+				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
+				if (outputCT.logp < tempCT.logp)
+				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
+				if (outputCT.logq > tempCT.logq)
+				outputCT.modDownToAndEqual(tempCT.logq);
+				if (outputCT.logq < tempCT.logq)
+				tempCT.modDownToAndEqual(outputCT.logq);
+
+				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
+				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+				scheme.addAndEqual(outputCT, tempCT);
+				tempCT.free();
+			}
+			NTL_EXEC_RANGE_END
+
+		Ciphertext ctx;
+		ctx.copy(outputCT);
+		Ciphertext ctxx;
+		ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[38][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[39][0], logp);
+		ctxx.reScaleByAndEqual(logp);
+
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		ctx.modDownToAndEqual(ctxx.logq);
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConstAndEqual(ctxx, NNdate[37][0]);
+
+		outputCT.copy(ctxx);
+		outputCTs[outputidx].copy(outputCT);
+		outputCT.free();
+
+		ctx.free();
+		ctxx.free();
+	}
+
+
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 
+	for (long i = 0; i < hidden_units; ++i)
+		CTs[i].copy(outputCTs[i]);
+
+	wmatrix = new double*[hidden_units];
+	cout << endl << "wmatrix: " << endl;
+	for (int i = 0; i < hidden_units; ++i) {
+		wmatrix[i] = new double[hidden_units]();
+		for (int j = 0; j < hidden_units; ++j) {
+			wmatrix[i][j] = NNdate[40][i * hidden_units + j];
+			cout << wmatrix[i][j] << "\t";
+		}
+		cout << endl << endl;
+	}
+	bvector = new double[hidden_units]();
+	cout << endl << "bvector: " << endl;
+	for (long i = 0; i < hidden_units; ++i) {
+		bvector[i] = NNdate[41][i];
+		cout << bvector[i] << "\t";
+	}
+	outputCTs = new Ciphertext[hidden_units];
+	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
+		auto mvec = EvaluatorUtils::randomRealArray(slots);
+		for (long i = 0; i < slots; ++i) {
+			mvec[i] = bvector[outputidx];
+		}
+		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
+		delete[] mvec;
+
+		NTL_EXEC_RANGE(hidden_units, first, last)
+			for (long inputidx = first; inputidx < last; ++inputidx) {
+				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+				tempCT.reScaleByAndEqual(logp);
+				if (outputCT.logp > tempCT.logp)
+				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
+				if (outputCT.logp < tempCT.logp)
+				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
+				if (outputCT.logq > tempCT.logq)
+				outputCT.modDownToAndEqual(tempCT.logq);
+				if (outputCT.logq < tempCT.logq)
+				tempCT.modDownToAndEqual(outputCT.logq);
+
+				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
+				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+				scheme.addAndEqual(outputCT, tempCT);
+				tempCT.free();
+			}
+			NTL_EXEC_RANGE_END
+
+		Ciphertext ctx;
+		ctx.copy(outputCT);
+		Ciphertext ctxx;
+		ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[43][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[44][0], logp);
+		ctxx.reScaleByAndEqual(logp);
+
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		ctx.modDownToAndEqual(ctxx.logq);
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConstAndEqual(ctxx, NNdate[42][0]);
+
+		outputCT.copy(ctxx);
+		outputCTs[outputidx].copy(outputCT);
+		outputCT.free();
+
+		ctx.free();
+		ctxx.free();
+	}
+
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 
+	for (long i = 0; i < hidden_units; ++i)
+		CTs[i].copy(outputCTs[i]);
+
+	wmatrix = new double*[hidden_units];
+	cout << endl << "wmatrix: " << endl;
+	for (int i = 0; i < hidden_units; ++i) {
+		wmatrix[i] = new double[hidden_units]();
+		for (int j = 0; j < hidden_units; ++j) {
+			wmatrix[i][j] = NNdate[45][i * hidden_units + j];
+			cout << wmatrix[i][j] << "\t";
+		}
+		cout << endl << endl;
+	}
+	bvector = new double[hidden_units]();
+	cout << endl << "bvector: " << endl;
+	for (long i = 0; i < hidden_units; ++i) {
+		bvector[i] = NNdate[46][i];
+		cout << bvector[i] << "\t";
+	}
+	outputCTs = new Ciphertext[hidden_units];
+	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
+		auto mvec = EvaluatorUtils::randomRealArray(slots);
+		for (long i = 0; i < slots; ++i) {
+			mvec[i] = bvector[outputidx];
+		}
+		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
+		delete[] mvec;
+
+		NTL_EXEC_RANGE(hidden_units, first, last)
+			for (long inputidx = first; inputidx < last; ++inputidx) {
+				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+				tempCT.reScaleByAndEqual(logp);
+				if (outputCT.logp > tempCT.logp)
+				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
+				if (outputCT.logp < tempCT.logp)
+				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
+				if (outputCT.logq > tempCT.logq)
+				outputCT.modDownToAndEqual(tempCT.logq);
+				if (outputCT.logq < tempCT.logq)
+				tempCT.modDownToAndEqual(outputCT.logq);
+
+				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
+				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+				scheme.addAndEqual(outputCT, tempCT);
+				tempCT.free();
+			}
+			NTL_EXEC_RANGE_END
+
+		Ciphertext ctx;
+		ctx.copy(outputCT);
+		Ciphertext ctxx;
+		ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[48][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[49][0], logp);
+		ctxx.reScaleByAndEqual(logp);
+
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		ctx.modDownToAndEqual(ctxx.logq);
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConstAndEqual(ctxx, NNdate[47][0]);
+
+		outputCT.copy(ctxx);
+		outputCTs[outputidx].copy(outputCT);
+		outputCT.free();
+
+		ctx.free();
+		ctxx.free();
+	}
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11 
+	for (long i = 0; i < hidden_units; ++i)
+		CTs[i].copy(outputCTs[i]);
+
+	wmatrix = new double*[hidden_units];
+	cout << endl << "wmatrix: " << endl;
+	for (int i = 0; i < hidden_units; ++i) {
+		wmatrix[i] = new double[hidden_units]();
+		for (int j = 0; j < hidden_units; ++j) {
+			wmatrix[i][j] = NNdate[50][i * hidden_units + j];
+			cout << wmatrix[i][j] << "\t";
+		}
+		cout << endl << endl;
+	}
+	bvector = new double[hidden_units]();
+	cout << endl << "bvector: " << endl;
+	for (long i = 0; i < hidden_units; ++i) {
+		bvector[i] = NNdate[51][i];
+		cout << bvector[i] << "\t";
+	}
+	outputCTs = new Ciphertext[hidden_units];
+	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
+		auto mvec = EvaluatorUtils::randomRealArray(slots);
+		for (long i = 0; i < slots; ++i) {
+			mvec[i] = bvector[outputidx];
+		}
+		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
+		delete[] mvec;
+
+		NTL_EXEC_RANGE(hidden_units, first, last)
+			for (long inputidx = first; inputidx < last; ++inputidx) {
+				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
+				tempCT.reScaleByAndEqual(logp);
+				if (outputCT.logp > tempCT.logp)
+				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
+				if (outputCT.logp < tempCT.logp)
+				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
+				if (outputCT.logq > tempCT.logq)
+				outputCT.modDownToAndEqual(tempCT.logq);
+				if (outputCT.logq < tempCT.logq)
+				tempCT.modDownToAndEqual(outputCT.logq);
+
+				cout << "outputCT.logp == tempCT.logp" << outputCT.logp << "df" << tempCT.logp << endl;
+				cout << "outputCT.logq == tempCT.logq" << outputCT.logq <<"SF"<< tempCT.logq << endl;
+				scheme.addAndEqual(outputCT, tempCT);
+				tempCT.free();
+			}
+			NTL_EXEC_RANGE_END
+
+		Ciphertext ctx;
+		ctx.copy(outputCT);
+		Ciphertext ctxx;
+		ctxx = scheme.mult(ctx, ctx);
+		ctxx.reScaleByAndEqual(logp);
+
+		ctx = scheme.multByConst(ctx, NNdate[53][0], logp);
+		ctx.reScaleByAndEqual(logp);
+
+		ctxx = scheme.multByConst(ctxx, NNdate[54][0], logp);
+		ctxx.reScaleByAndEqual(logp);
+
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		ctx.modDownToAndEqual(ctxx.logq);
+		cout << "ctx.logp" << ctx.logp << endl;
+		cout << "ctxx.logp" << ctxx.logp << endl;
+		cout << "ctx.logq" << ctx.logq << endl;
+		cout << "ctxx.logq" << ctxx.logq << endl;
+		scheme.addAndEqual(ctxx, ctx);
+
+		scheme.addConstAndEqual(ctxx, NNdate[52][0]);
+
+		outputCT.copy(ctxx);
+		outputCTs[outputidx].copy(outputCT);
+		outputCT.free();
+
+		ctx.free();
+		ctxx.free();
+	}
+
+
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
+// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11 > Output 
+	auto mres = EvaluatorUtils::randomRealArray(slots);
+	for (long i = 0; i < slots; ++i) {
+		mres[i] = 0;
+	}
+	auto resultCT = scheme.encrypt(mres, slots, outputCTs[0].logp,
+			outputCTs[0].logq);
+
+	for (long i = 0; i < hidden_units; ++i) {
+
+		outputCTs[i] = scheme.multByConst(outputCTs[i], NNdate[55][i], logp);
+
+		outputCTs[i].reScaleByAndEqual(logp);
+
+		if (resultCT.logp > outputCTs[i].logp)
+			resultCT.reScaleByAndEqual(resultCT.logp - outputCTs[i].logp);
+		if (resultCT.logp < outputCTs[i].logp)
+			outputCTs[i].reScaleByAndEqual(outputCTs[i].logp - resultCT.logp);
+		if (resultCT.logq > outputCTs[i].logq)
+			resultCT.modDownToAndEqual(outputCTs[i].logq);
+		if (resultCT.logq < outputCTs[i].logq)
+			outputCTs[i].modDownToAndEqual(resultCT.logq);
+		scheme.addAndEqual(resultCT, outputCTs[i]);
+
+	}
+	scheme.addConstAndEqual(resultCT, NNdate[56][0]);
+
+// END: Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11 > Output 
 
 	CTs[0].copy(resultCT);
 

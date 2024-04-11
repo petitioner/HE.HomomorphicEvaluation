@@ -24,6 +24,10 @@ int main(int argc, char **argv) {
 
 		MyMethods::NNover30();
 
+		MyMethods::NNover50();
+
+		MyMethods::NNover70();
+
 	
 	
 
