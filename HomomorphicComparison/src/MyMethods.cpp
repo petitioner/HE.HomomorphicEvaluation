@@ -397,20 +397,20 @@ void MyMethods::NNover30() {
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2
 	double **wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[5][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	double *bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[6][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	Ciphertext *outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -484,20 +484,20 @@ void MyMethods::NNover30() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[10][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[11][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -570,20 +570,20 @@ void MyMethods::NNover30() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[15][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[16][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -656,20 +656,20 @@ void MyMethods::NNover30() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[20][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[21][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -743,20 +743,20 @@ void MyMethods::NNover30() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[25][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[26][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -831,20 +831,20 @@ void MyMethods::NNover30() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[30][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[31][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -1045,20 +1045,20 @@ void MyMethods::NNover50() {
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2
 	double **wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[5][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	double *bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[6][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	Ciphertext *outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -1121,20 +1121,20 @@ void MyMethods::NNover50() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[10][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[11][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -1197,20 +1197,20 @@ void MyMethods::NNover50() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[15][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[16][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -1273,20 +1273,20 @@ void MyMethods::NNover50() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[20][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[21][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -1349,20 +1349,20 @@ void MyMethods::NNover50() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[25][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[26][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -1425,20 +1425,20 @@ void MyMethods::NNover50() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[30][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[31][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -1502,20 +1502,20 @@ void MyMethods::NNover50() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[35][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[36][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -1580,20 +1580,20 @@ void MyMethods::NNover50() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[40][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[41][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -1790,20 +1790,20 @@ void MyMethods::NNover70() {
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2
 	double **wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[5][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	double *bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[6][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	Ciphertext *outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -1866,20 +1866,20 @@ void MyMethods::NNover70() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[10][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[11][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -1942,20 +1942,20 @@ void MyMethods::NNover70() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[15][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[16][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -2018,20 +2018,20 @@ void MyMethods::NNover70() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[20][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[21][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -2094,20 +2094,20 @@ void MyMethods::NNover70() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[25][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[26][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -2170,20 +2170,20 @@ void MyMethods::NNover70() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[30][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[31][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -2247,20 +2247,20 @@ void MyMethods::NNover70() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[35][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[36][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -2325,20 +2325,20 @@ void MyMethods::NNover70() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[40][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[41][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -2402,20 +2402,20 @@ void MyMethods::NNover70() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[45][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[46][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
@@ -2478,20 +2478,20 @@ void MyMethods::NNover70() {
 		CTs[i].copy(outputCTs[i]);
 
 	wmatrix = new double*[hidden_units];
-	cout << endl << "wmatrix: " << endl;
+	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
 		wmatrix[i] = new double[hidden_units]();
 		for (int j = 0; j < hidden_units; ++j) {
 			wmatrix[i][j] = NNdate[50][i * hidden_units + j];
-			cout << wmatrix[i][j] << "\t";
+			//cout << wmatrix[i][j] << "\t";
 		}
 		cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
-	cout << endl << "bvector: " << endl;
+	//cout << endl << "bvector: " << endl;
 	for (long i = 0; i < hidden_units; ++i) {
 		bvector[i] = NNdate[51][i];
-		cout << bvector[i] << "\t";
+		//cout << bvector[i] << "\t";
 	}
 	outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
