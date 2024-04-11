@@ -14,7 +14,7 @@ using namespace NTL;
 
 int main(int argc, char **argv) {
 
-	SetNumThreads(4);
+	SetNumThreads(6);
 
 		//MyMethods::testSine();
 
@@ -22,11 +22,11 @@ int main(int argc, char **argv) {
 
 		/////////////////MyMethods::Sigmoid100();//failed 
 
-		//MyMethods::NNover30();
+		MyMethods::NNover30();
 
-		MyMethods::NNover50();
+		//MyMethods::NNover50();
 
-		MyMethods::NNover70();
+		//MyMethods::NNover70();
 
 	
 	
