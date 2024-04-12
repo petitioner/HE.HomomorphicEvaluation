@@ -2799,6 +2799,7 @@ void MyMethods::NNover70() {
 	}
 	scheme.addConstAndEqual(resultCT, NNdate[56][0]);
 
+	
 // END: Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11 > Output 
 
 	CTs[0].copy(resultCT);
