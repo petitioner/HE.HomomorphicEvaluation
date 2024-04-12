@@ -308,6 +308,7 @@ void MyMethods::Sigmoid100() {
 
 }
 
+
 void MyMethods::NNover30() {
 
 	cout << endl << endl << endl << "void MyMethods::NNover30() {" << endl
