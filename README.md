@@ -1,3 +1,36 @@
+# 並行計算時的Bug是scheme.addAndEqual(outputCT, tempCTs[inputidx]);NTL並行計算不完美應該尋找替代方案：NTL並行塊里對共享變量進行改變
+    ```cpp
+       ZZ InnerProd(const ZZ *a, const ZZ *b, long n)
+   {
+      PartitionInfo pinfo(n);
+
+      long cnt = pinfo.NumIntervals();
+
+      Vec<ZZ> acc;
+      acc.SetLength(cnt);
+
+      NTL_EXEC_INDEX(cnt, index)
+
+         long first, last;
+         pinfo.interval(first, last, index);
+
+         ZZ& sum = acc[index];
+         sum = 0;
+         for (long i = first; i < last; i++)
+            MulAddTo(sum, a[i], b[i]);
+
+      NTL_EXEC_INDEX_END
+
+      ZZ sum;
+      sum = 0;
+      for (long i = 0; i < cnt; i++)
+         sum += acc[i];
+
+      return sum;
+   }
+   '''
+   from https://libntl.org/doc/BasicThreadPool.cpp.html
+
 # 可以使用NN來找最佳多項式 畢竟NN矩陣乘法多項式激活函數的結果就是多項式
 
 # HE.HomomorphicComparison
