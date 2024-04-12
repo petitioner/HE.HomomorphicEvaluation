@@ -41,7 +41,7 @@ void MyMethods::testSine() {
 	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, logN, logQ);
 
-	SetNumThreads(1);
+	//SetNumThreads(1);
 
 	srand(time(NULL));
 
@@ -101,7 +101,7 @@ void MyMethods::Sigmoid28() {
 	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, logN, logQ);
 
-	SetNumThreads(1);
+	//SetNumThreads(1);
 
 	srand(time(NULL));
 
@@ -223,7 +223,7 @@ void MyMethods::Sigmoid100() {
 	SecretKey secretKey(logN);
 	Scheme scheme(secretKey, logN, logQ);
 
-	SetNumThreads(1);
+	//SetNumThreads(1);
 
 	srand(time(NULL));
 
@@ -390,6 +390,8 @@ cout << mvec1[i] << "\t";
 			ctx.free();
 			ctxx.free();
 
+			cout << "Input > Layer1" << endl;
+
 		}
 		NTL_EXEC_RANGE_END
 
@@ -444,6 +446,8 @@ cout << mvec1[i] << "\t";
 				tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
+
+		cout << "// Input > Layer1 > Layer2" << endl;
 
 
 
@@ -539,6 +543,8 @@ cout << mvec1[i] << "\t";
 				tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
+
+		cout << "// Input > Layer1 > Layer2 > Layer3" << endl;
 
 
 
@@ -637,6 +643,8 @@ cout << mvec1[i] << "\t";
 		}
 		delete[] tempCTs;
 
+		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4" << endl;
+
 
 
 		Ciphertext ctx;
@@ -730,6 +738,8 @@ cout << mvec1[i] << "\t";
 				tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
+
+		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5" << endl;
 
 
 
@@ -826,6 +836,8 @@ cout << mvec1[i] << "\t";
 		}
 		delete[] tempCTs;
 
+		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6" << endl;
+
 
 
 		Ciphertext ctx;
@@ -921,6 +933,8 @@ cout << mvec1[i] << "\t";
 				tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
+
+		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7" << endl;
 
 
 
