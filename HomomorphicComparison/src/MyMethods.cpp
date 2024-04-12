@@ -434,7 +434,7 @@ cout << mvec1[i] << "\t";
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -529,7 +529,7 @@ cout << mvec1[i] << "\t";
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -626,7 +626,7 @@ cout << mvec1[i] << "\t";
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -720,7 +720,7 @@ cout << mvec1[i] << "\t";
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -815,7 +815,7 @@ cout << mvec1[i] << "\t";
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -911,7 +911,7 @@ cout << mvec1[i] << "\t";
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -1134,7 +1134,7 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -1218,7 +1218,7 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -1302,7 +1302,7 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -1386,7 +1386,7 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -1470,7 +1470,7 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -1554,7 +1554,7 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -1640,7 +1640,7 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -1726,7 +1726,7 @@ void MyMethods::NNover50() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -1945,7 +1945,7 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -2030,7 +2030,7 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -2115,7 +2115,7 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -2200,7 +2200,7 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -2285,7 +2285,7 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -2371,7 +2371,7 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -2457,7 +2457,7 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -2543,7 +2543,7 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -2629,7 +2629,7 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
@@ -2714,7 +2714,7 @@ void MyMethods::NNover70() {
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[i].copy(tempCT);
+				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
 		NTL_EXEC_RANGE_END
