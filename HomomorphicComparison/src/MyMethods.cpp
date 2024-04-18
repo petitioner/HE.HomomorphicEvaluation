@@ -357,8 +357,12 @@ cout << mvec1[i] << "\t";
 	Ciphertext cipher1 = scheme.encrypt(mvec1, slots, logp, logQ);
 	timeutils.stop("Encrypt one batch");
 
+	TimeUtils totaltime;
+	totaltime.start("The Total Time Consumed");
+
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1
+	timeutils.start("Input > Layer1 ");
 	Ciphertext *CTs = new Ciphertext[hidden_units];
 	NTL_EXEC_RANGE(hidden_units, first, last)
 		for (long i = first; i < last; ++i) {
@@ -396,8 +400,11 @@ cout << mvec1[i] << "\t";
 		}
 		NTL_EXEC_RANGE_END
 
+
+		timeutils.stop("Input > Layer1 ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2
+		timeutils.start("Input > Layer1 > Layer2 ");
 	double **wmatrix = new double*[hidden_units];
 	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
@@ -406,7 +413,7 @@ cout << mvec1[i] << "\t";
 			wmatrix[i][j] = NNdate[5][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	double *bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -480,9 +487,9 @@ cout << mvec1[i] << "\t";
 	}
 
 	cout << endl << "// Input > Layer1 > Layer2" << endl;
-	timeutils.start("Decrypt batch");
+	//timeutils.start("Decrypt batch");
 	auto dvec2 = scheme.decrypt(secretKey, outputCTs[0]);
-	timeutils.stop("Decrypt batch");
+	//timeutils.stop("Decrypt batch");
 
 	cout << endl << endl << endl << "SDFS:" << endl;
 	for (long i = 0; i < slots; ++i)
@@ -490,8 +497,10 @@ cout << mvec1[i] << "\t";
 	cout << endl << endl << endl;
 
 
+	timeutils.stop("Input > Layer1 > Layer2 ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3
+	timeutils.start("Input > Layer1 > Layer2 > Layer3 ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -503,7 +512,7 @@ cout << mvec1[i] << "\t";
 			wmatrix[i][j] = NNdate[10][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -580,17 +589,19 @@ cout << mvec1[i] << "\t";
 	}
 
 	cout << endl << "// Input > Layer1 > Layer2 > Layer3" << endl;
-	timeutils.start("Decrypt batch");
+	//timeutils.start("Decrypt batch");
 	auto dvec3 = scheme.decrypt(secretKey, outputCTs[0]);
-	timeutils.stop("Decrypt batch");
+	//timeutils.stop("Decrypt batch");
 
 	cout << endl << endl << endl << "SDFS:" << endl;
 	for (long i = 0; i < slots; ++i)
 		cout << dvec3[i] << ",\t";
 	cout << endl << endl << endl;
 
+	timeutils.stop("Input > Layer1 > Layer2 > Layer3 ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 
+	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4  ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -602,7 +613,7 @@ cout << mvec1[i] << "\t";
 			wmatrix[i][j] = NNdate[15][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -676,17 +687,19 @@ cout << mvec1[i] << "\t";
 	}
 
 	cout << endl << "// Input > Layer1 > Layer2 > Layer3 > Layer4" << endl;
-	timeutils.start("Decrypt batch");
+	//timeutils.start("Decrypt batch");
 	auto dvec4 = scheme.decrypt(secretKey, outputCTs[0]);
-	timeutils.stop("Decrypt batch");
+	//timeutils.stop("Decrypt batch");
 
 	cout << endl << endl << endl << "SDFS:" << endl;
 	for (long i = 0; i < slots; ++i)
 		cout << dvec4[i] << ",\t";
 	cout << endl << endl << endl;
 
+	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4  ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 
+	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5  ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -698,7 +711,7 @@ cout << mvec1[i] << "\t";
 			wmatrix[i][j] = NNdate[20][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -772,18 +785,19 @@ cout << mvec1[i] << "\t";
 	}
 
 	cout << endl << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5" << endl;
-	timeutils.start("Decrypt batch");
+	//timeutils.start("Decrypt batch");
 	auto dvec5 = scheme.decrypt(secretKey, outputCTs[0]);
-	timeutils.stop("Decrypt batch");
+	//timeutils.stop("Decrypt batch");
 
 	cout << endl << endl << endl << "SDFS:" << endl;
 	for (long i = 0; i < slots; ++i)
 		cout << dvec5[i] << ",\t";
 	cout << endl << endl << endl;
 
-
+	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5  ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 
+	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6  ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -795,7 +809,7 @@ cout << mvec1[i] << "\t";
 			wmatrix[i][j] = NNdate[25][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -870,18 +884,19 @@ cout << mvec1[i] << "\t";
 
 
 	cout << endl << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6" << endl;
-	timeutils.start("Decrypt batch");
+	//timeutils.start("Decrypt batch");
 	auto dvec6 = scheme.decrypt(secretKey, outputCTs[0]);
-	timeutils.stop("Decrypt batch");
+	//timeutils.stop("Decrypt batch");
 
 	cout << endl << endl << endl << "SDFS:" << endl;
 	for (long i = 0; i < slots; ++i)
 		cout << dvec6[i] << ",\t";
 	cout << endl << endl << endl;
 
-
+	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6  ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 
+	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7  ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -893,7 +908,7 @@ cout << mvec1[i] << "\t";
 			wmatrix[i][j] = NNdate[30][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -968,17 +983,18 @@ cout << mvec1[i] << "\t";
 	}
 
 	cout << endl << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7" << endl;
-	timeutils.start("Decrypt batch");
+	//timeutils.start("Decrypt batch");
 	auto dvec7 = scheme.decrypt(secretKey, outputCTs[0]);
-	timeutils.stop("Decrypt batch");
+	//timeutils.stop("Decrypt batch");
 
 	cout << endl << endl << endl << "SDFS:" << endl;
 	for (long i = 0; i < slots; ++i)
 		cout << dvec7[i] << ",\t";
 	cout << endl << endl << endl;
-
+	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7  ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output
+	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output ");
 	auto mres = EvaluatorUtils::randomRealArray(slots);
 	for (long i = 0; i < slots; ++i) {
 		mres[i] = 0;
@@ -1004,6 +1020,8 @@ cout << mvec1[i] << "\t";
 
 	}
 	scheme.addConstAndEqual(resultCT, NNdate[36][0]);
+	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output ");
+	totaltime.stop("The Total Time Consumed");
 
 // END: Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output
 
@@ -1018,6 +1036,10 @@ cout << mvec1[i] << "\t";
 	for (long i = 0; i < slots; ++i)
 		cout << dvec1[i] << ",\t";
 	cout << endl << endl << endl;
+
+
+	cout << "Model provider : begin : CurrentRSS (MB): " << ( MyTools::getCurrentRSS() /1024.0/1024.0 ) << endl;
+	cout << "Model provider : begin : PeakRSS    (MB): " << ( MyTools::getPeakRSS() /1024.0/1024.0 )    << endl;
 
 }
 
@@ -1071,8 +1093,12 @@ void MyMethods::NNover50() {
 	Ciphertext cipher1 = scheme.encrypt(mvec1, slots, logp, logQ);
 	timeutils.stop("Encrypt one batch");
 
+	TimeUtils totaltime;
+	totaltime.start("The Total Time Consumed");
+
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1
+	timeutils.start("Input > Layer1 ");
 	Ciphertext *CTs = new Ciphertext[hidden_units];
 	NTL_EXEC_RANGE(hidden_units, first, last)
 		for (long i = first; i < last; ++i) {
@@ -1107,9 +1133,10 @@ void MyMethods::NNover50() {
 
 		}
 		NTL_EXEC_RANGE_END
-
+		timeutils.stop("Input > Layer1 ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2
+		timeutils.start("Input > Layer1 > Layer2 ");
 	double **wmatrix = new double*[hidden_units];
 	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
@@ -1118,7 +1145,7 @@ void MyMethods::NNover50() {
 			wmatrix[i][j] = NNdate[5][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	double *bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -1188,9 +1215,11 @@ void MyMethods::NNover50() {
 		ctx.free();
 		ctxx.free();
 	}
-
+		timeutils.stop("Input > Layer1 > Layer2 ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3
+		timeutils.start("Input > Layer1 > Layer2 > Layer3 ");
+
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -1202,7 +1231,7 @@ void MyMethods::NNover50() {
 			wmatrix[i][j] = NNdate[10][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -1272,9 +1301,10 @@ void MyMethods::NNover50() {
 		ctx.free();
 		ctxx.free();
 	}
-
+		timeutils.stop("Input > Layer1 > Layer2 > Layer3 ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 
+		timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4  ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -1286,7 +1316,7 @@ void MyMethods::NNover50() {
 			wmatrix[i][j] = NNdate[15][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -1356,9 +1386,10 @@ void MyMethods::NNover50() {
 		ctx.free();
 		ctxx.free();
 	}
-
+		timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4  ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 
+		timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -1370,7 +1401,7 @@ void MyMethods::NNover50() {
 			wmatrix[i][j] = NNdate[20][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -1440,9 +1471,10 @@ void MyMethods::NNover50() {
 		ctx.free();
 		ctxx.free();
 	}
-
+		timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 
+		timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -1454,7 +1486,7 @@ void MyMethods::NNover50() {
 			wmatrix[i][j] = NNdate[25][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -1524,9 +1556,10 @@ void MyMethods::NNover50() {
 		ctx.free();
 		ctxx.free();
 	}
-
+		timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 
+		timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -1538,7 +1571,7 @@ void MyMethods::NNover50() {
 			wmatrix[i][j] = NNdate[30][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -1610,9 +1643,10 @@ void MyMethods::NNover50() {
 		ctxx.free();
 	}
 
-
+		timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 
+		timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8  ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -1624,7 +1658,7 @@ void MyMethods::NNover50() {
 			wmatrix[i][j] = NNdate[35][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -1696,9 +1730,10 @@ void MyMethods::NNover50() {
 	}
 
 
-
+		timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8  ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 
+		timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9  ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -1710,7 +1745,7 @@ void MyMethods::NNover50() {
 			wmatrix[i][j] = NNdate[40][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -1783,9 +1818,10 @@ void MyMethods::NNover50() {
 	}
 
 
-
+		timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9  ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Output 
+		timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Output  ");
 	auto mres = EvaluatorUtils::randomRealArray(slots);
 	for (long i = 0; i < slots; ++i) {
 		mres[i] = 0;
@@ -1812,6 +1848,10 @@ void MyMethods::NNover50() {
 	}
 	scheme.addConstAndEqual(resultCT, NNdate[46][0]);
 
+	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Output  ");
+
+	totaltime.stop("The Total Time Consumed");
+
 // END: Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Output 
 
 	CTs[0].copy(resultCT);
@@ -1830,6 +1870,11 @@ void MyMethods::NNover50() {
 	for (long i = 0; i < slots; ++i)
 		cout << dvec1[i] << ",\t";
 	cout << endl << endl << endl;
+
+
+
+	cout << "Model provider : begin : CurrentRSS (MB): " << ( MyTools::getCurrentRSS() /1024.0/1024.0 ) << endl;
+	cout << "Model provider : begin : PeakRSS    (MB): " << ( MyTools::getPeakRSS() /1024.0/1024.0 )    << endl;
 
 }
 
@@ -1935,7 +1980,7 @@ void MyMethods::NNover70() {
 			wmatrix[i][j] = NNdate[5][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	double *bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -2022,7 +2067,7 @@ void MyMethods::NNover70() {
 			wmatrix[i][j] = NNdate[10][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -2109,7 +2154,7 @@ void MyMethods::NNover70() {
 			wmatrix[i][j] = NNdate[15][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -2196,7 +2241,7 @@ void MyMethods::NNover70() {
 			wmatrix[i][j] = NNdate[20][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -2283,7 +2328,7 @@ void MyMethods::NNover70() {
 			wmatrix[i][j] = NNdate[25][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -2371,7 +2416,7 @@ void MyMethods::NNover70() {
 			wmatrix[i][j] = NNdate[30][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -2459,7 +2504,7 @@ void MyMethods::NNover70() {
 			wmatrix[i][j] = NNdate[35][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -2547,7 +2592,7 @@ void MyMethods::NNover70() {
 			wmatrix[i][j] = NNdate[40][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -2635,7 +2680,7 @@ void MyMethods::NNover70() {
 			wmatrix[i][j] = NNdate[45][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
@@ -2722,7 +2767,7 @@ void MyMethods::NNover70() {
 			wmatrix[i][j] = NNdate[50][i * hidden_units + j];
 			//cout << wmatrix[i][j] << "\t";
 		}
-		cout << endl << endl;
+		//cout << endl << endl;
 	}
 	bvector = new double[hidden_units]();
 	//cout << endl << "bvector: " << endl;
