@@ -1887,6 +1887,7 @@ void MyMethods::NNover70() {
 	totaltime.start("The Total Time Consumed");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1
+	timeutils.start("Input > Layer1");
 	Ciphertext *CTs = new Ciphertext[hidden_units];
 	NTL_EXEC_RANGE(hidden_units, first, last)
 		for (long i = first; i < last; ++i) {
@@ -1921,9 +1922,11 @@ void MyMethods::NNover70() {
 
 		}
 		NTL_EXEC_RANGE_END
+	timeutils.stop("Input > Layer1");
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2
+	timeutils.start("Input > Layer1 > Layer2");
 	double **wmatrix = new double*[hidden_units];
 	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
@@ -2003,9 +2006,11 @@ void MyMethods::NNover70() {
 		ctx.free();
 		ctxx.free();
 	}
+	timeutils.stop("Input > Layer1 > Layer2");
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3
+	timeutils.start("Input > Layer1 > Layer2 > Layer3");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -2088,9 +2093,11 @@ void MyMethods::NNover70() {
 		ctx.free();
 		ctxx.free();
 	}
+	timeutils.stop("Input > Layer1 > Layer2 > Layer3");
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 
+	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -2173,9 +2180,11 @@ void MyMethods::NNover70() {
 		ctx.free();
 		ctxx.free();
 	}
+	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 ");
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 
+	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -2258,9 +2267,11 @@ void MyMethods::NNover70() {
 		ctx.free();
 		ctxx.free();
 	}
+	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 ");
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 
+	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -2344,9 +2355,11 @@ void MyMethods::NNover70() {
 		ctx.free();
 		ctxx.free();
 	}
+	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 ");
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 
+	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -2429,10 +2442,12 @@ void MyMethods::NNover70() {
 		ctx.free();
 		ctxx.free();
 	}
+	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 ");
 
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 
+	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -2514,11 +2529,13 @@ void MyMethods::NNover70() {
 		ctx.free();
 		ctxx.free();
 	}
+	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 ");
 
 
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 
+	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -2601,10 +2618,12 @@ void MyMethods::NNover70() {
 		ctx.free();
 		ctxx.free();
 	}
+	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 ");
 
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 
+	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -2687,9 +2706,11 @@ void MyMethods::NNover70() {
 		ctx.free();
 		ctxx.free();
 	}
+	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 ");
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11 
+	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -2772,10 +2793,12 @@ void MyMethods::NNover70() {
 		ctx.free();
 		ctxx.free();
 	}
+	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11");
 
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11 > Output 
+	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11 > Output ");
 	auto mres = EvaluatorUtils::randomRealArray(slots);
 	for (long i = 0; i < slots; ++i) {
 		mres[i] = 0;
@@ -2801,7 +2824,7 @@ void MyMethods::NNover70() {
 
 	}
 	scheme.addConstAndEqual(resultCT, NNdate[56][0]);
-	
+	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11 > Output ");
 	totaltime.stop("The Total Time Consumed");
 	
 // END: Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11 > Output 
