@@ -520,7 +520,7 @@ cout << mvec1[i] << "\t";
 		bvector[i] = NNdate[11][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -621,7 +621,7 @@ cout << mvec1[i] << "\t";
 		bvector[i] = NNdate[16][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -719,7 +719,7 @@ cout << mvec1[i] << "\t";
 		bvector[i] = NNdate[21][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -817,7 +817,7 @@ cout << mvec1[i] << "\t";
 		bvector[i] = NNdate[26][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -916,7 +916,7 @@ cout << mvec1[i] << "\t";
 		bvector[i] = NNdate[31][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -1041,6 +1041,13 @@ cout << mvec1[i] << "\t";
 	cout << "Model provider : begin : CurrentRSS (MB): " << ( MyTools::getCurrentRSS() /1024.0/1024.0 ) << endl;
 	cout << "Model provider : begin : PeakRSS    (MB): " << ( MyTools::getPeakRSS() /1024.0/1024.0 )    << endl;
 
+
+	for (long i = 0; i < hidden_units; ++i) {
+		CTs[i].free();
+		outputCTs[i].free();
+	}
+
+	
 }
 
 
@@ -1239,7 +1246,7 @@ void MyMethods::NNover50() {
 		bvector[i] = NNdate[11][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -1324,7 +1331,7 @@ void MyMethods::NNover50() {
 		bvector[i] = NNdate[16][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -1409,7 +1416,7 @@ void MyMethods::NNover50() {
 		bvector[i] = NNdate[21][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -1494,7 +1501,7 @@ void MyMethods::NNover50() {
 		bvector[i] = NNdate[26][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -1579,7 +1586,7 @@ void MyMethods::NNover50() {
 		bvector[i] = NNdate[31][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -1666,7 +1673,7 @@ void MyMethods::NNover50() {
 		bvector[i] = NNdate[36][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -1753,7 +1760,7 @@ void MyMethods::NNover50() {
 		bvector[i] = NNdate[41][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -1875,6 +1882,13 @@ void MyMethods::NNover50() {
 
 	cout << "Model provider : begin : CurrentRSS (MB): " << ( MyTools::getCurrentRSS() /1024.0/1024.0 ) << endl;
 	cout << "Model provider : begin : PeakRSS    (MB): " << ( MyTools::getPeakRSS() /1024.0/1024.0 )    << endl;
+
+
+	for (long i = 0; i < hidden_units; ++i) {
+		CTs[i].free();
+		outputCTs[i].free();
+	}
+
 
 }
 
@@ -2893,5 +2907,11 @@ void MyMethods::NNover70() {
 
 	cout << "Model provider : begin : CurrentRSS (MB): " << ( MyTools::getCurrentRSS() /1024.0/1024.0 ) << endl;
 	cout << "Model provider : begin : PeakRSS    (MB): " << ( MyTools::getPeakRSS() /1024.0/1024.0 )    << endl;
+
+
+	for (long i = 0; i < hidden_units; ++i) {
+		CTs[i].free();
+		outputCTs[i].free();
+	}
 
 }
