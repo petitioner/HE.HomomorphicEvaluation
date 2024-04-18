@@ -1,6 +1,6 @@
 # 並行計算時的Bug是scheme.addAndEqual(outputCT, tempCTs[inputidx]);NTL並行計算不完美應該尋找替代方案：NTL並行塊里可能無法對共享變量進行改變
    
-    ```cpp
+```cpp
         ZZ InnerProd(const ZZ *a, const ZZ *b, long n)
        {
       PartitionInfo pinfo(n);
@@ -30,7 +30,7 @@
       return sum;
     }
     from https://libntl.org/doc/BasicThreadPool.cpp.html
-   ```
+```
 
 # 可以使用NN來找最佳多項式 畢竟NN矩陣乘法多項式激活函數的結果就是多項式
 
