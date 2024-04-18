@@ -2846,7 +2846,7 @@ void MyMethods::NNover70() {
 		cout << dvec1[i] << ",\t";
 	cout << endl << endl << endl;
 
-	cout << "Model provider : begin : CurrentRSS (MB): " << ( Tools::getCurrentRSS() /1024.0/1024.0 ) << endl;
-	cout << "Model provider : begin : PeakRSS    (MB): " << ( Tools::getPeakRSS() /1024.0/1024.0 )    << endl;
+	cout << "Model provider : begin : CurrentRSS (MB): " << ( MyTools::getCurrentRSS() /1024.0/1024.0 ) << endl;
+	cout << "Model provider : begin : PeakRSS    (MB): " << ( MyTools::getPeakRSS() /1024.0/1024.0 )    << endl;
 
 }
