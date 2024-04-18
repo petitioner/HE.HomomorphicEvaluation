@@ -1882,6 +1882,9 @@ void MyMethods::NNover70() {
 	Ciphertext cipher1 = scheme.encrypt(mvec1, slots, logp, logQ);
 	timeutils.stop("Encrypt one batch");
 
+
+	TimeUtils totaltime;
+	totaltime.start("The Total Time Consumed");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1
 	Ciphertext *CTs = new Ciphertext[hidden_units];
@@ -2022,7 +2025,7 @@ void MyMethods::NNover70() {
 		bvector[i] = NNdate[11][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -2107,7 +2110,7 @@ void MyMethods::NNover70() {
 		bvector[i] = NNdate[16][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -2192,7 +2195,7 @@ void MyMethods::NNover70() {
 		bvector[i] = NNdate[21][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -2277,7 +2280,7 @@ void MyMethods::NNover70() {
 		bvector[i] = NNdate[26][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -2363,7 +2366,7 @@ void MyMethods::NNover70() {
 		bvector[i] = NNdate[31][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -2449,7 +2452,7 @@ void MyMethods::NNover70() {
 		bvector[i] = NNdate[36][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -2535,7 +2538,7 @@ void MyMethods::NNover70() {
 		bvector[i] = NNdate[41][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -2621,7 +2624,7 @@ void MyMethods::NNover70() {
 		bvector[i] = NNdate[46][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -2706,7 +2709,7 @@ void MyMethods::NNover70() {
 		bvector[i] = NNdate[51][i];
 		//cout << bvector[i] << "\t";
 	}
-	outputCTs = new Ciphertext[hidden_units];
+	//outputCTs = new Ciphertext[hidden_units];
 	for (long outputidx = 0; outputidx < hidden_units; ++outputidx) {
 		auto mvec = EvaluatorUtils::randomRealArray(slots);
 		for (long i = 0; i < slots; ++i) {
@@ -2798,7 +2801,8 @@ void MyMethods::NNover70() {
 
 	}
 	scheme.addConstAndEqual(resultCT, NNdate[56][0]);
-
+	
+	totaltime.stop("The Total Time Consumed");
 	
 // END: Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11 > Output 
 
@@ -2818,5 +2822,8 @@ void MyMethods::NNover70() {
 	for (long i = 0; i < slots; ++i)
 		cout << dvec1[i] << ",\t";
 	cout << endl << endl << endl;
+
+	cout << "Model provider : begin : CurrentRSS (MB): " << ( Tools::getCurrentRSS() /1024.0/1024.0 ) << endl;
+	cout << "Model provider : begin : PeakRSS    (MB): " << ( Tools::getPeakRSS() /1024.0/1024.0 )    << endl;
 
 }
