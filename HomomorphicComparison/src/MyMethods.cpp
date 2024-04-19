@@ -369,8 +369,10 @@ cout << mvec1[i] << "\t";
 // Input > Layer1
 	timeutils.start("Input > Layer1 ");
 	Ciphertext *CTs = new Ciphertext[hidden_units];
-	NTL_EXEC_RANGE(hidden_units, first, last)
-		for (long i = first; i < last; ++i) {
+    #pragma omp parallel
+    {
+        #pragma omp for
+		for (long i = 0; i < hidden_units; ++i) {
 			CTs[i].copy(cipher1);
 
 			CTs[i] = scheme.multByConst(CTs[i], NNdate[0][i], logp);
@@ -403,8 +405,8 @@ cout << mvec1[i] << "\t";
 			cout << "Input > Layer1" << endl;
 
 		}
-		NTL_EXEC_RANGE_END
-
+		//NTL_EXEC_RANGE_END
+	}
 
 		timeutils.stop("Input > Layer1 ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
@@ -436,8 +438,10 @@ cout << mvec1[i] << "\t";
 		delete[] mvec;
 
 		Ciphertext *tempCTs = new Ciphertext[hidden_units];
-		NTL_EXEC_RANGE(hidden_units, first, last)
-			for (long inputidx = first; inputidx < last; ++inputidx) {
+    #pragma omp parallel
+    {
+        #pragma omp for
+			for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
 				tempCT.reScaleByAndEqual(logp);
 				if (outputCT.logp > tempCT.logp)
@@ -452,7 +456,8 @@ cout << mvec1[i] << "\t";
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+		//NTL_EXEC_RANGE_END
+	}
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
@@ -535,8 +540,10 @@ cout << mvec1[i] << "\t";
 		delete[] mvec;
 
 		Ciphertext *tempCTs = new Ciphertext[hidden_units];
-		NTL_EXEC_RANGE(hidden_units, first, last)
-			for (long inputidx = first; inputidx < last; ++inputidx) {
+    #pragma omp parallel
+    {
+        #pragma omp for
+			for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
 				tempCT.reScaleByAndEqual(logp);
 				if (outputCT.logp > tempCT.logp)
@@ -551,8 +558,8 @@ cout << mvec1[i] << "\t";
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
-
+		//NTL_EXEC_RANGE_END
+	}
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
 				tempCTs[inputidx].free();
@@ -636,8 +643,10 @@ cout << mvec1[i] << "\t";
 		delete[] mvec;
 
 		Ciphertext *tempCTs = new Ciphertext[hidden_units];
-		NTL_EXEC_RANGE(hidden_units, first, last)
-			for (long inputidx = first; inputidx < last; ++inputidx) {
+    #pragma omp parallel
+    {
+        #pragma omp for
+			for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
 				tempCT.reScaleByAndEqual(logp);
 				if (outputCT.logp > tempCT.logp)
@@ -652,7 +661,8 @@ cout << mvec1[i] << "\t";
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+		//NTL_EXEC_RANGE_END
+	}
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
@@ -734,8 +744,10 @@ cout << mvec1[i] << "\t";
 		delete[] mvec;
 
 		Ciphertext *tempCTs = new Ciphertext[hidden_units];
-		NTL_EXEC_RANGE(hidden_units, first, last)
-			for (long inputidx = first; inputidx < last; ++inputidx) {
+    #pragma omp parallel
+    {
+        #pragma omp for
+			for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
 				tempCT.reScaleByAndEqual(logp);
 				if (outputCT.logp > tempCT.logp)
@@ -750,8 +762,8 @@ cout << mvec1[i] << "\t";
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
-
+		//NTL_EXEC_RANGE_END
+	}
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
 				tempCTs[inputidx].free();
@@ -832,8 +844,10 @@ cout << mvec1[i] << "\t";
 		delete[] mvec;
 
 		Ciphertext *tempCTs = new Ciphertext[hidden_units];
-		NTL_EXEC_RANGE(hidden_units, first, last)
-			for (long inputidx = first; inputidx < last; ++inputidx) {
+    #pragma omp parallel
+    {
+        #pragma omp for
+			for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
 				tempCT.reScaleByAndEqual(logp);
 				if (outputCT.logp > tempCT.logp)
@@ -848,8 +862,8 @@ cout << mvec1[i] << "\t";
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
-
+		//NTL_EXEC_RANGE_END
+	}
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
 				tempCTs[inputidx].free();
@@ -931,8 +945,10 @@ cout << mvec1[i] << "\t";
 		delete[] mvec;
 
 		Ciphertext *tempCTs = new Ciphertext[hidden_units];
-		NTL_EXEC_RANGE(hidden_units, first, last)
-			for (long inputidx = first; inputidx < last; ++inputidx) {
+    #pragma omp parallel
+    {
+        #pragma omp for
+			for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
 				tempCT.reScaleByAndEqual(logp);
 				if (outputCT.logp > tempCT.logp)
@@ -947,7 +963,8 @@ cout << mvec1[i] << "\t";
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+		//NTL_EXEC_RANGE_END
+	}
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
