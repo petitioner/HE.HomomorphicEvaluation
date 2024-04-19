@@ -1061,7 +1061,7 @@ cout << mvec1[i] << "\t";
             break;
 
         double x = -30 + 0.01 * i;
-        double sigmoidx =  1 / (1 + std::exp(-x));
+        double sigmoidx =  1 / (1 + std::exp(-x)) - 0.5;
         double y = dvec1[i];
 
         file << x << "," << sigmoidx  << "," << y << std::endl;
@@ -1929,7 +1929,7 @@ void MyMethods::NNover50() {
             break;
 
         double x = -50 + 0.01 * i;
-        double sigmoidx =  1 / (1 + std::exp(-x));
+        double sigmoidx =  1 / (1 + std::exp(-x)) - 0.5;
         double y = dvec1[i];
 
         file << x << "," << sigmoidx  << "," << y << std::endl;
@@ -2980,7 +2980,7 @@ void MyMethods::NNover70() {
             break;
 
         double x = -70 + 0.01 * i;
-        double sigmoidx =  1 / (1 + std::exp(-x));
+        double sigmoidx =  1 / (1 + std::exp(-x)) - 0.5;
         double y = dvec1[i];
 
         file << x << "," << sigmoidx  << "," << y << std::endl;
