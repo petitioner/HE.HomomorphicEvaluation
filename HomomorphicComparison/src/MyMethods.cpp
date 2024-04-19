@@ -369,9 +369,8 @@ cout << mvec1[i] << "\t";
 // Input > Layer1
 	timeutils.start("Input > Layer1 ");
 	Ciphertext *CTs = new Ciphertext[hidden_units];
-    #pragma omp parallel
-    {
-        #pragma omp for
+
+    #pragma omp parallel for
 		for (long i = 0; i < hidden_units; ++i) {
 			CTs[i].copy(cipher1);
 
@@ -404,7 +403,7 @@ cout << mvec1[i] << "\t";
 
 			cout << "Input > Layer1" << endl;
 
-		}
+		
 		//NTL_EXEC_RANGE_END
 	}
 
@@ -437,11 +436,10 @@ cout << mvec1[i] << "\t";
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
-		Ciphertext *tempCTs = new Ciphertext[hidden_units];
-    #pragma omp parallel
-    {
-        #pragma omp for
-			for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+	
+    
+        #pragma omp parallel for
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
 				tempCT.reScaleByAndEqual(logp);
 				if (outputCT.logp > tempCT.logp)
@@ -453,17 +451,11 @@ cout << mvec1[i] << "\t";
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[inputidx].copy(tempCT);
+				#pragma omp critical
+				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
-			}
-		//NTL_EXEC_RANGE_END
-	}
-
-		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
 		}
-		delete[] tempCTs;
+
 
 		cout << "// Input > Layer1 > Layer2" << endl;
 
@@ -539,11 +531,8 @@ cout << mvec1[i] << "\t";
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
-		Ciphertext *tempCTs = new Ciphertext[hidden_units];
-    #pragma omp parallel
-    {
-        #pragma omp for
-			for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+        #pragma omp parallel for
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
 				tempCT.reScaleByAndEqual(logp);
 				if (outputCT.logp > tempCT.logp)
@@ -555,16 +544,10 @@ cout << mvec1[i] << "\t";
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[inputidx].copy(tempCT);
+				#pragma omp critical
+				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
-			}
-		//NTL_EXEC_RANGE_END
-	}
-		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
 		}
-		delete[] tempCTs;
 
 		cout << "// Input > Layer1 > Layer2 > Layer3" << endl;
 
@@ -642,11 +625,8 @@ cout << mvec1[i] << "\t";
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
-		Ciphertext *tempCTs = new Ciphertext[hidden_units];
-    #pragma omp parallel
-    {
-        #pragma omp for
-			for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+        #pragma omp parallel for
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
 				tempCT.reScaleByAndEqual(logp);
 				if (outputCT.logp > tempCT.logp)
@@ -658,17 +638,10 @@ cout << mvec1[i] << "\t";
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[inputidx].copy(tempCT);
+				#pragma omp critical
+				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
-			}
-		//NTL_EXEC_RANGE_END
-	}
-
-		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
 		}
-		delete[] tempCTs;
 
 		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4" << endl;
 
@@ -743,11 +716,8 @@ cout << mvec1[i] << "\t";
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
-		Ciphertext *tempCTs = new Ciphertext[hidden_units];
-    #pragma omp parallel
-    {
-        #pragma omp for
-			for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+        #pragma omp parallel for
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
 				tempCT.reScaleByAndEqual(logp);
 				if (outputCT.logp > tempCT.logp)
@@ -759,16 +729,10 @@ cout << mvec1[i] << "\t";
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[inputidx].copy(tempCT);
+				#pragma omp critical
+				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
-			}
-		//NTL_EXEC_RANGE_END
-	}
-		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
 		}
-		delete[] tempCTs;
 
 		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5" << endl;
 
@@ -843,11 +807,8 @@ cout << mvec1[i] << "\t";
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
-		Ciphertext *tempCTs = new Ciphertext[hidden_units];
-    #pragma omp parallel
-    {
-        #pragma omp for
-			for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+        #pragma omp parallel for
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
 				tempCT.reScaleByAndEqual(logp);
 				if (outputCT.logp > tempCT.logp)
@@ -859,16 +820,10 @@ cout << mvec1[i] << "\t";
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[inputidx].copy(tempCT);
+				#pragma omp critical
+				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
-			}
-		//NTL_EXEC_RANGE_END
-	}
-		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
 		}
-		delete[] tempCTs;
 
 		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6" << endl;
 
@@ -944,11 +899,8 @@ cout << mvec1[i] << "\t";
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
-		Ciphertext *tempCTs = new Ciphertext[hidden_units];
-    #pragma omp parallel
-    {
-        #pragma omp for
-			for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
+        #pragma omp parallel for
+		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
 				tempCT.reScaleByAndEqual(logp);
 				if (outputCT.logp > tempCT.logp)
@@ -960,17 +912,10 @@ cout << mvec1[i] << "\t";
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				tempCTs[inputidx].copy(tempCT);
+				#pragma omp critical
+				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
-			}
-		//NTL_EXEC_RANGE_END
-	}
-
-		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
 		}
-		delete[] tempCTs;
 
 		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7" << endl;
 
@@ -1024,6 +969,7 @@ cout << mvec1[i] << "\t";
 	auto resultCT = scheme.encrypt(mres, slots, outputCTs[0].logp,
 			outputCTs[0].logq);
 
+	#pragma omp parallel for
 	for (long i = 0; i < hidden_units; ++i) {
 
 		outputCTs[i] = scheme.multByConst(outputCTs[i], NNdate[35][i], logp);
@@ -1038,6 +984,8 @@ cout << mvec1[i] << "\t";
 			resultCT.modDownToAndEqual(outputCTs[i].logq);
 		if (resultCT.logq < outputCTs[i].logq)
 			outputCTs[i].modDownToAndEqual(resultCT.logq);
+
+		#pragma omp critical
 		scheme.addAndEqual(resultCT, outputCTs[i]);
 
 	}
@@ -1063,7 +1011,7 @@ cout << mvec1[i] << "\t";
 	cout << "Model provider : begin : CurrentRSS (MB): " << ( MyTools::getCurrentRSS() /1024.0/1024.0 ) << endl;
 	cout << "Model provider : begin : PeakRSS    (MB): " << ( MyTools::getPeakRSS() /1024.0/1024.0 )    << endl;
 //////////////////////////////////////////////////////////////////////////////////////////
-	   std::ofstream file("NNover30Plot.csv");
+	   std::ofstream file("NNover30Plot_OpenMP.csv");
     if (!file.is_open()) {
         std::cerr << "Error: Failed to open file for writing." << std::endl;
         return;
