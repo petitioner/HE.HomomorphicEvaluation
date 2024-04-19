@@ -24,6 +24,11 @@
 #include <string>
 #include <omp.h>      // openmg
 
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <math.h>
+
 #include <unistd.h>
 
 using namespace std;
@@ -1040,6 +1045,32 @@ cout << mvec1[i] << "\t";
 
 	cout << "Model provider : begin : CurrentRSS (MB): " << ( MyTools::getCurrentRSS() /1024.0/1024.0 ) << endl;
 	cout << "Model provider : begin : PeakRSS    (MB): " << ( MyTools::getPeakRSS() /1024.0/1024.0 )    << endl;
+//////////////////////////////////////////////////////////////////////////////////////////
+	   std::ofstream file("NNover30Plot.csv");
+    if (!file.is_open()) {
+        std::cerr << "Error: Failed to open file for writing." << std::endl;
+        return;
+    }
+
+    // 写入列标题
+    file << "X,SigmoidX,Y" << std::endl;
+
+    // 写入数据
+    for (long i = 0; ; ++i) {
+        if (mvec1[i] > 30)
+            break;
+
+        double x = -30 + 0.01 * i;
+        double sigmoidx =  1 / (1 + std::exp(-x));
+        double y = dvec1[i];
+
+        file << x << "," << y << "," << sigmoidY << std::endl;
+
+    }
+
+    file.close();
+//////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 	for (long i = 0; i < hidden_units; ++i) {
@@ -1882,6 +1913,32 @@ void MyMethods::NNover50() {
 
 	cout << "Model provider : begin : CurrentRSS (MB): " << ( MyTools::getCurrentRSS() /1024.0/1024.0 ) << endl;
 	cout << "Model provider : begin : PeakRSS    (MB): " << ( MyTools::getPeakRSS() /1024.0/1024.0 )    << endl;
+//////////////////////////////////////////////////////////////////////////////////////////
+	   std::ofstream file("NNover50Plot.csv");
+    if (!file.is_open()) {
+        std::cerr << "Error: Failed to open file for writing." << std::endl;
+        return;
+    }
+
+    // 写入列标题
+    file << "X,SigmoidX,Y" << std::endl;
+
+    // 写入数据
+    for (long i = 0; ; ++i) {
+        if (mvec1[i] > 50)
+            break;
+
+        double x = -50 + 0.01 * i;
+        double sigmoidx =  1 / (1 + std::exp(-x));
+        double y = dvec1[i];
+
+        file << x << "," << y << "," << sigmoidY << std::endl;
+
+    }
+
+    file.close();
+//////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 	for (long i = 0; i < hidden_units; ++i) {
@@ -2907,7 +2964,31 @@ void MyMethods::NNover70() {
 
 	cout << "Model provider : begin : CurrentRSS (MB): " << ( MyTools::getCurrentRSS() /1024.0/1024.0 ) << endl;
 	cout << "Model provider : begin : PeakRSS    (MB): " << ( MyTools::getPeakRSS() /1024.0/1024.0 )    << endl;
+//////////////////////////////////////////////////////////////////////////////////////////
+	   std::ofstream file("NNover70Plot.csv");
+    if (!file.is_open()) {
+        std::cerr << "Error: Failed to open file for writing." << std::endl;
+        return;
+    }
 
+    // 写入列标题
+    file << "X,SigmoidX,Y" << std::endl;
+
+    // 写入数据
+    for (long i = 0; ; ++i) {
+        if (mvec1[i] > 70)
+            break;
+
+        double x = -70 + 0.01 * i;
+        double sigmoidx =  1 / (1 + std::exp(-x));
+        double y = dvec1[i];
+
+        file << x << "," << y << "," << sigmoidY << std::endl;
+
+    }
+
+    file.close();
+//////////////////////////////////////////////////////////////////////////////////////////
 
 	for (long i = 0; i < hidden_units; ++i) {
 		CTs[i].free();
