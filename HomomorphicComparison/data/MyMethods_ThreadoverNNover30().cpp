@@ -395,6 +395,9 @@ void MyMethods::NNover30() {
 	chunkSize = hidden_units / numThreads;
 	remainder = hidden_units % numThreads;
 	startIndex = 0;
+	cout << "chunkSize" << chunkSize << endl;
+	cout << "remainder" << remainder << endl;
+	cout << "startIndex" << startIndex << endl;
 	for (int i = 0; i < numThreads; ++i) {
 		int endIndex = startIndex + chunkSize;
 		if (i < remainder) {
@@ -403,20 +406,20 @@ void MyMethods::NNover30() {
 
 		// 创建线程并执行任务
 		threadPool[i] = std::thread([&](int start, int end, int id) {
-			for (int i = start; i < end; ++i) {
+			for (int j = start; j < end; ++j) {
 				std::lock_guard < std::mutex > lock(mtx);
-				std::cout << "Thread " << id << ": i = " << i << std::endl;
+				std::cout << "Thread " << id << ": j = " << j << std::endl;
 
-				CTs[i].copy(cipher1);
+				CTs[j].copy(cipher1);
 
-				CTs[i] = scheme.multByConst(CTs[i], NNdate[0][i], logp);
+				CTs[j] = scheme.multByConst(CTs[j], NNdate[0][j], logp);
 
-				CTs[i].reScaleByAndEqual(logp);
+				CTs[j].reScaleByAndEqual(logp);
 
-				scheme.addConstAndEqual(CTs[i], NNdate[1][i]);
+				scheme.addConstAndEqual(CTs[j], NNdate[1][j]);
 
 				Ciphertext ctx;
-				ctx.copy(CTs[i]);
+				ctx.copy(CTs[j]);
 				Ciphertext ctxx;
 				ctxx = scheme.mult(ctx, ctx);
 				ctxx.reScaleByAndEqual(logp);
@@ -502,9 +505,9 @@ void MyMethods::NNover30() {
 			// 创建线程并执行任务
 			threadPool[i] = std::thread(
 					[&](int start, int end, int id) {
-						for (int i = start; i < end; ++i) {
-							auto tempCT = scheme.multByConst(CTs[i],
-									wmatrix[i][outputidx], logp);
+						for (int j = start; j < end; ++j) {
+							auto tempCT = scheme.multByConst(CTs[j],
+									wmatrix[j][outputidx], logp);
 							tempCT.reScaleByAndEqual(logp);
 							if (outputCT.logp > tempCT.logp)
 								outputCT.reScaleByAndEqual(
@@ -524,7 +527,7 @@ void MyMethods::NNover30() {
 
 							tempCT.free();
 
-							std::cout << "Thread " << id << ": i = " << i
+							std::cout << "Thread " << id << ": j = " << j
 									<< std::endl;
 						}
 						tasksCompleted += (end - start);
@@ -629,9 +632,9 @@ void MyMethods::NNover30() {
 			// 创建线程并执行任务
 			threadPool[i] = std::thread(
 					[&](int start, int end, int id) {
-						for (int i = start; i < end; ++i) {
-							auto tempCT = scheme.multByConst(CTs[i],
-									wmatrix[i][outputidx], logp);
+						for (int j = start; j < end; ++j) {
+							auto tempCT = scheme.multByConst(CTs[j],
+									wmatrix[j][outputidx], logp);
 							tempCT.reScaleByAndEqual(logp);
 							if (outputCT.logp > tempCT.logp)
 								outputCT.reScaleByAndEqual(
@@ -651,7 +654,7 @@ void MyMethods::NNover30() {
 
 							tempCT.free();
 
-							std::cout << "Thread " << id << ": i = " << i
+							std::cout << "Thread " << id << ": j = " << j
 									<< std::endl;
 						}
 						tasksCompleted += (end - start);
@@ -756,9 +759,9 @@ void MyMethods::NNover30() {
 			// 创建线程并执行任务
 			threadPool[i] = std::thread(
 					[&](int start, int end, int id) {
-						for (int i = start; i < end; ++i) {
-							auto tempCT = scheme.multByConst(CTs[i],
-									wmatrix[i][outputidx], logp);
+						for (int j = start; j < end; ++j) {
+							auto tempCT = scheme.multByConst(CTs[j],
+									wmatrix[j][outputidx], logp);
 							tempCT.reScaleByAndEqual(logp);
 							if (outputCT.logp > tempCT.logp)
 								outputCT.reScaleByAndEqual(
@@ -883,9 +886,9 @@ void MyMethods::NNover30() {
 			// 创建线程并执行任务
 			threadPool[i] = std::thread(
 					[&](int start, int end, int id) {
-						for (int i = start; i < end; ++i) {
-							auto tempCT = scheme.multByConst(CTs[i],
-									wmatrix[i][outputidx], logp);
+						for (int j = start; j < end; ++j) {
+							auto tempCT = scheme.multByConst(CTs[j],
+									wmatrix[j][outputidx], logp);
 							tempCT.reScaleByAndEqual(logp);
 							if (outputCT.logp > tempCT.logp)
 								outputCT.reScaleByAndEqual(
@@ -1012,9 +1015,9 @@ void MyMethods::NNover30() {
 			// 创建线程并执行任务
 			threadPool[i] = std::thread(
 					[&](int start, int end, int id) {
-						for (int i = start; i < end; ++i) {
-							auto tempCT = scheme.multByConst(CTs[i],
-									wmatrix[i][outputidx], logp);
+						for (int j = start; j < end; ++j) {
+							auto tempCT = scheme.multByConst(CTs[j],
+									wmatrix[j][outputidx], logp);
 							tempCT.reScaleByAndEqual(logp);
 							if (outputCT.logp > tempCT.logp)
 								outputCT.reScaleByAndEqual(
@@ -1034,7 +1037,7 @@ void MyMethods::NNover30() {
 
 							tempCT.free();
 
-							std::cout << "Thread " << id << ": i = " << i
+							std::cout << "Thread " << id << ": j = " << j
 									<< std::endl;
 						}
 						tasksCompleted += (end - start);
@@ -1144,9 +1147,9 @@ void MyMethods::NNover30() {
 			// 创建线程并执行任务
 			threadPool[i] = std::thread(
 					[&](int start, int end, int id) {
-						for (int i = start; i < end; ++i) {
-							auto tempCT = scheme.multByConst(CTs[i],
-									wmatrix[i][outputidx], logp);
+						for (int j = start; j < end; ++j) {
+							auto tempCT = scheme.multByConst(CTs[j],
+									wmatrix[j][outputidx], logp);
 							tempCT.reScaleByAndEqual(logp);
 							if (outputCT.logp > tempCT.logp)
 								outputCT.reScaleByAndEqual(
@@ -1166,7 +1169,7 @@ void MyMethods::NNover30() {
 
 							tempCT.free();
 
-							std::cout << "Thread " << id << ": i = " << i
+							std::cout << "Thread " << id << ": j = " << j
 									<< std::endl;
 						}
 						tasksCompleted += (end - start);
@@ -1255,31 +1258,31 @@ void MyMethods::NNover30() {
 		// 创建线程并执行任务
 		threadPool[i] = std::thread(
 				[&](int start, int end, int id) {
-					for (int i = start; i < end; ++i) {
+					for (int j = start; j < end; ++j) {
 
-						outputCTs[i] = scheme.multByConst(outputCTs[i],
-								NNdate[35][i], logp);
+						outputCTs[j] = scheme.multByConst(outputCTs[j],
+								NNdate[35][j], logp);
 
-						outputCTs[i].reScaleByAndEqual(logp);
+						outputCTs[j].reScaleByAndEqual(logp);
 
-						if (resultCT.logp > outputCTs[i].logp)
+						if (resultCT.logp > outputCTs[j].logp)
 							resultCT.reScaleByAndEqual(
-									resultCT.logp - outputCTs[i].logp);
-						if (resultCT.logp < outputCTs[i].logp)
-							outputCTs[i].reScaleByAndEqual(
-									outputCTs[i].logp - resultCT.logp);
-						if (resultCT.logq > outputCTs[i].logq)
-							resultCT.modDownToAndEqual(outputCTs[i].logq);
-						if (resultCT.logq < outputCTs[i].logq)
-							outputCTs[i].modDownToAndEqual(resultCT.logq);
+									resultCT.logp - outputCTs[j].logp);
+						if (resultCT.logp < outputCTs[j].logp)
+							outputCTs[j].reScaleByAndEqual(
+									outputCTs[j].logp - resultCT.logp);
+						if (resultCT.logq > outputCTs[j].logq)
+							resultCT.modDownToAndEqual(outputCTs[j].logq);
+						if (resultCT.logq < outputCTs[j].logq)
+							outputCTs[j].modDownToAndEqual(resultCT.logq);
 
 						{
 							std::lock_guard < std::mutex > lock(mtx);
-							scheme.addAndEqual(resultCT, outputCTs[i]);
+							scheme.addAndEqual(resultCT, outputCTs[j]);
 
 						}
 
-						std::cout << "Thread " << id << ": i = " << i
+						std::cout << "Thread " << id << ": j = " << j
 								<< std::endl;
 					}
 					tasksCompleted += (end - start);
