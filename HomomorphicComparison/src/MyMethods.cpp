@@ -40,6 +40,7 @@
 using namespace std;
 using namespace NTL;
 
+
 void MyMethods::testSine() {
 
 	long logN = 13;
