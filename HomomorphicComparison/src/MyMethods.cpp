@@ -559,7 +559,7 @@ pool.wait();
         //#pragma omp parallel for
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 
-			        pool.enqueue([i, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme] {
+			        pool.enqueue([inputidx, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme, outputidx] {
             std::lock_guard<std::mutex> lock(cout_mutex);
             
 
@@ -663,7 +663,7 @@ pool.wait();
         //#pragma omp parallel for
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 
-			        pool.enqueue([i, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme] {
+			        pool.enqueue([inputidx, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme, outputidx] {
             std::lock_guard<std::mutex> lock(cout_mutex);
             
 
@@ -768,7 +768,7 @@ pool.wait();
         //#pragma omp parallel for
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 
-			        pool.enqueue([inputidx, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme] {
+			        pool.enqueue([inputidx, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme, outputidx] {
             std::lock_guard<std::mutex> lock(cout_mutex);
             
 
@@ -870,7 +870,7 @@ pool.wait();
         //#pragma omp parallel for
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 
-			        pool.enqueue([inputidx, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme] {
+			        pool.enqueue([inputidx, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme, outputidx] {
             std::lock_guard<std::mutex> lock(cout_mutex);
             
 
@@ -973,7 +973,7 @@ pool.wait();
         //#pragma omp parallel for
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 
-			        pool.enqueue([inputidx, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme] {
+			        pool.enqueue([inputidx, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme, outputidx] {
             std::lock_guard<std::mutex> lock(cout_mutex);
             
 
@@ -1077,7 +1077,7 @@ pool.wait();
         //#pragma omp parallel for
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 
-			        pool.enqueue([inputidx, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme] {
+			        pool.enqueue([inputidx, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme, outputidx] {
             std::lock_guard<std::mutex> lock(cout_mutex);
             
 
