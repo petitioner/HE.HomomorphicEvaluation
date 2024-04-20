@@ -46,7 +46,7 @@
 
 class ThreadPool {
 public:
-    ThreadPool(size_t numThreads) : stop(false) {
+    ThreadPool(size_t numThreads) : stop(false), tasksCompleted(0) {
         for (size_t i = 0; i < numThreads; ++i) {
             workers.emplace_back(
                 [this] {
@@ -67,6 +67,12 @@ public:
                         }
 
                         task();
+
+                        {
+                            std::lock_guard<std::mutex> lock(queue_mutex);
+                            ++tasksCompleted;
+                        }
+                        condition.notify_all();
                     }
                 }
             );
@@ -93,6 +99,12 @@ public:
         }
     }
 
+    // 等待所有任务执行完毕
+    void wait() {
+        std::unique_lock<std::mutex> lock(queue_mutex);
+        condition.wait(lock, [this] { return tasksCompleted == tasks.size(); });
+    }
+
 private:
     std::vector<std::thread> workers;
     std::queue<std::function<void()>> tasks;
@@ -100,7 +112,9 @@ private:
     std::mutex queue_mutex;
     std::condition_variable condition;
     bool stop;
+    size_t tasksCompleted;
 };
+
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
@@ -500,7 +514,7 @@ cout << mvec1[i] << "\t";
 		
 		//NTL_EXEC_RANGE_END
 	}
-
+pool.wait();
 	//timeutils.start("Decrypt batch");
 	auto dvec12 = scheme.decrypt(secretKey, CTs[0]);
 	//timeutils.stop("Decrypt batch");
@@ -571,7 +585,7 @@ cout << mvec1[i] << "\t";
 
 		}
 
-
+pool.wait();
 		cout << "// Input > Layer1 > Layer2" << endl;
 
 
@@ -674,6 +688,7 @@ cout << mvec1[i] << "\t";
 
 
 		}
+		pool.wait();
 		cout << "// Input > Layer1 > Layer2 > Layer3" << endl;
 
 
@@ -778,7 +793,7 @@ cout << mvec1[i] << "\t";
 
 
 		}
-
+pool.wait();
 		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4" << endl;
 
 
@@ -881,7 +896,7 @@ cout << mvec1[i] << "\t";
 
 
 		}
-
+pool.wait();
 		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5" << endl;
 
 
@@ -984,7 +999,7 @@ cout << mvec1[i] << "\t";
 
 
 		}
-
+pool.wait();
 		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6" << endl;
 
 
@@ -1088,7 +1103,7 @@ cout << mvec1[i] << "\t";
 
 
 		}
-
+pool.wait();
 		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7" << endl;
 
 
@@ -1169,6 +1184,7 @@ cout << mvec1[i] << "\t";
 
 
 	}
+	pool.wait();
 	scheme.addConstAndEqual(resultCT, NNdate[36][0]);
 	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output ");
 	totaltime.stop("The Total Time Consumed");
