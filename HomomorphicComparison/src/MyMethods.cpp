@@ -40,7 +40,6 @@
 using namespace std;
 using namespace NTL;
 
-
 void MyMethods::testSine() {
 
 	long logN = 13;
@@ -338,13 +337,17 @@ void MyMethods::NNover30() {
 	////////////////////////////////////////////////////// SetNumThreads(1); //
 
 	//////////////////////////////////////////////////////
-	const int numThreads = std::thread::hardware_concurrency(); // 获取硬件线程数
-	// 创建线程池
-	std::vector < std::thread > threadPool(numThreads);
+    const int numThreads = std::thread::hardware_concurrency(); // 获取硬件线程数
 
-	// 互斥量和原子变量用于同步
-	std::mutex mtx;
-	std::atomic<int> tasksCompleted(0);
+    // 创建线程池
+    std::vector<std::thread> threadPool(numThreads);
+
+    // 互斥量和原子变量用于同步
+    std::mutex mtx;
+    std::atomic<int> tasksCompleted(0);
+    int chunkSize;
+    int remainder ;
+    int startIndex;
 	//////////////////////////////////////////////////////
 
 	srand(time(NULL));
@@ -450,7 +453,7 @@ void MyMethods::NNover30() {
 	}
 
 	// 检查任务是否全部完成
-	if (tasksCompleted == N) {
+	if (tasksCompleted == hidden_units) {
 		std::cout << "All tasks completed." << std::endl;
 	} else {
 		std::cout << "Some tasks are not completed." << std::endl;
@@ -536,7 +539,7 @@ void MyMethods::NNover30() {
 		}
 
 		// 检查任务是否全部完成
-		if (tasksCompleted == N) {
+		if (tasksCompleted == hidden_units) {
 			std::cout << "All tasks completed." << std::endl;
 		} else {
 			std::cout << "Some tasks are not completed." << std::endl;
@@ -663,7 +666,7 @@ void MyMethods::NNover30() {
 		}
 
 		// 检查任务是否全部完成
-		if (tasksCompleted == N) {
+		if (tasksCompleted == hidden_units) {
 			std::cout << "All tasks completed." << std::endl;
 		} else {
 			std::cout << "Some tasks are not completed." << std::endl;
@@ -790,7 +793,7 @@ void MyMethods::NNover30() {
 		}
 
 		// 检查任务是否全部完成
-		if (tasksCompleted == N) {
+		if (tasksCompleted == hidden_units) {
 			std::cout << "All tasks completed." << std::endl;
 		} else {
 			std::cout << "Some tasks are not completed." << std::endl;
@@ -917,7 +920,7 @@ void MyMethods::NNover30() {
 		}
 
 		// 检查任务是否全部完成
-		if (tasksCompleted == N) {
+		if (tasksCompleted == hidden_units) {
 			std::cout << "All tasks completed." << std::endl;
 		} else {
 			std::cout << "Some tasks are not completed." << std::endl;
@@ -1046,7 +1049,7 @@ void MyMethods::NNover30() {
 		}
 
 		// 检查任务是否全部完成
-		if (tasksCompleted == N) {
+		if (tasksCompleted == hidden_units) {
 			std::cout << "All tasks completed." << std::endl;
 		} else {
 			std::cout << "Some tasks are not completed." << std::endl;
@@ -1178,7 +1181,7 @@ void MyMethods::NNover30() {
 		}
 
 		// 检查任务是否全部完成
-		if (tasksCompleted == N) {
+		if (tasksCompleted == hidden_units) {
 			std::cout << "All tasks completed." << std::endl;
 		} else {
 			std::cout << "Some tasks are not completed." << std::endl;
@@ -1291,7 +1294,7 @@ void MyMethods::NNover30() {
 	}
 
 	// 检查任务是否全部完成
-	if (tasksCompleted == N) {
+	if (tasksCompleted == hidden_units) {
 		std::cout << "All tasks completed." << std::endl;
 	} else {
 		std::cout << "Some tasks are not completed." << std::endl;
