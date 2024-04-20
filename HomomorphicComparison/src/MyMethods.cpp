@@ -463,12 +463,12 @@ void MyMethods::NNover30() {
 	}
 
 	//timeutils.start("Decrypt batch");
-	auto dvec1 = scheme.decrypt(secretKey, CTs[0]);
+	auto dvec12 = scheme.decrypt(secretKey, CTs[0]);
 	//timeutils.stop("Decrypt batch");
 
 	cout << endl << endl << endl << "SDFS:" << endl;
 	for (long i = 0; i < slots; ++i)
-		cout << dvec1[i] << ",\t";
+		cout << dvec12[i] << ",\t";
 	cout << endl << endl << endl;
 
 
