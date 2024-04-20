@@ -31,6 +31,12 @@
 
 #include <unistd.h>
 
+//////////////////////////////////////////////////////
+#include <thread>
+#include <mutex>
+#include <atomic>
+//////////////////////////////////////////////////////
+
 using namespace std;
 using namespace NTL;
 
@@ -313,7 +319,6 @@ void MyMethods::Sigmoid100() {
 
 }
 
-
 void MyMethods::NNover30() {
 
 	cout << endl << endl << endl << "void MyMethods::NNover30() {" << endl
@@ -330,6 +335,16 @@ void MyMethods::NNover30() {
 	Scheme scheme(secretKey, logN, logQ);
 
 	////////////////////////////////////////////////////// SetNumThreads(1); //
+
+	//////////////////////////////////////////////////////
+	const int numThreads = std::thread::hardware_concurrency(); // 获取硬件线程数
+	// 创建线程池
+	std::vector < std::thread > threadPool(numThreads);
+
+	// 互斥量和原子变量用于同步
+	std::mutex mtx;
+	std::atomic<int> tasksCompleted(0);
+	//////////////////////////////////////////////////////
 
 	srand(time(NULL));
 
@@ -354,8 +369,9 @@ void MyMethods::NNover30() {
 	auto mvec1 = EvaluatorUtils::randomRealArray(slots);
 	for (long i = 0; i < slots; ++i) {
 		mvec1[i] = -30 + 0.01 * i;
-		if (mvec1[i] > 30) mvec1[i] = 0.0;
-cout << mvec1[i] << "\t";
+		if (mvec1[i] > 30)
+			mvec1[i] = 0.0;
+		cout << mvec1[i] << "\t";
 	}
 
 	timeutils.start("Encrypt one batch");
@@ -370,47 +386,79 @@ cout << mvec1[i] << "\t";
 	timeutils.start("Input > Layer1 ");
 	Ciphertext *CTs = new Ciphertext[hidden_units];
 
-    #pragma omp parallel for
-		for (long i = 0; i < hidden_units; ++i) {
-			CTs[i].copy(cipher1);
+	tasksCompleted = 0;
+	// 分配任务给线程池中的线程
+	chunkSize = hidden_units / numThreads;
+	remainder = hidden_units % numThreads;
+	startIndex = 0;
+	for (int i = 0; i < numThreads; ++i) {
+		int endIndex = startIndex + chunkSize;
+		if (i < remainder) {
+			endIndex++; // 前 remainder 个线程多执行一次
+		}
 
-			CTs[i] = scheme.multByConst(CTs[i], NNdate[0][i], logp);
+		// 创建线程并执行任务
+		threadPool[i] = std::thread([&](int start, int end, int id) {
+			for (int i = start; i < end; ++i) {
+				std::lock_guard < std::mutex > lock(mtx);
+				std::cout << "Thread " << id << ": i = " << i << std::endl;
 
-			CTs[i].reScaleByAndEqual(logp);
+				CTs[i].copy(cipher1);
 
-			scheme.addConstAndEqual(CTs[i], NNdate[1][i]);
+				CTs[i] = scheme.multByConst(CTs[i], NNdate[0][i], logp);
 
-			Ciphertext ctx; ctx.copy(CTs[i]);
-			Ciphertext ctxx; ctxx = scheme.mult(ctx, ctx);
-			ctxx.reScaleByAndEqual(logp);
+				CTs[i].reScaleByAndEqual(logp);
 
-			ctx = scheme.multByConst(ctx, NNdate[3][0], logp);
-			ctx.reScaleByAndEqual(logp);
+				scheme.addConstAndEqual(CTs[i], NNdate[1][i]);
 
-			ctxx = scheme.multByConst(ctxx, NNdate[4][0], logp);
-			ctxx.reScaleByAndEqual(logp);
+				Ciphertext ctx;
+				ctx.copy(CTs[i]);
+				Ciphertext ctxx;
+				ctxx = scheme.mult(ctx, ctx);
+				ctxx.reScaleByAndEqual(logp);
 
-			ctx.modDownToAndEqual(ctxx.logq);
+				ctx = scheme.multByConst(ctx, NNdate[3][0], logp);
+				ctx.reScaleByAndEqual(logp);
 
-			scheme.addAndEqual(ctxx, ctx);
+				ctxx = scheme.multByConst(ctxx, NNdate[4][0], logp);
+				ctxx.reScaleByAndEqual(logp);
 
-			scheme.addConstAndEqual(ctxx, NNdate[2][0]);
+				ctx.modDownToAndEqual(ctxx.logq);
 
-			CTs[i].copy(ctxx);
+				scheme.addAndEqual(ctxx, ctx);
 
-			ctx.free();
-			ctxx.free();
+				scheme.addConstAndEqual(ctxx, NNdate[2][0]);
 
-			cout << "Input > Layer1" << endl;
+				CTs[i].copy(ctxx);
 
-		
-		//NTL_EXEC_RANGE_END
+				ctx.free();
+				ctxx.free();
+
+				cout << "Input > Layer1" << endl;
+
+			}
+			tasksCompleted += (end - start);
+		}, startIndex, endIndex, i);
+
+		startIndex = endIndex;
 	}
 
-		timeutils.stop("Input > Layer1 ");
+	// 等待线程池中所有线程执行完毕
+	for (auto &thread : threadPool) {
+		thread.join();
+	}
+
+	// 检查任务是否全部完成
+	if (tasksCompleted == N) {
+		std::cout << "All tasks completed." << std::endl;
+	} else {
+		std::cout << "Some tasks are not completed." << std::endl;
+	}
+
+	timeutils.stop("Input > Layer1 ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2
-		timeutils.start("Input > Layer1 > Layer2 ");
+	timeutils.start("Input > Layer1 > Layer2 ");
 	double **wmatrix = new double*[hidden_units];
 	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
@@ -436,30 +484,64 @@ cout << mvec1[i] << "\t";
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
-	
-    
-        #pragma omp parallel for
-		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
-				tempCT.reScaleByAndEqual(logp);
-				if (outputCT.logp > tempCT.logp)
-				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
-				if (outputCT.logp < tempCT.logp)
-				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
-				if (outputCT.logq > tempCT.logq)
-				outputCT.modDownToAndEqual(tempCT.logq);
-				if (outputCT.logq < tempCT.logq)
-				tempCT.modDownToAndEqual(outputCT.logq);
+		tasksCompleted = 0;
+		// 分配任务给线程池中的线程
+		chunkSize = hidden_units / numThreads;
+		remainder = hidden_units % numThreads;
+		startIndex = 0;
+		for (int i = 0; i < numThreads; ++i) {
+			int endIndex = startIndex + chunkSize;
+			if (i < remainder) {
+				endIndex++; // 前 remainder 个线程多执行一次
+			}
 
-				#pragma omp critical
-				scheme.addAndEqual(outputCT, tempCT);
-				tempCT.free();
+			// 创建线程并执行任务
+			threadPool[i] = std::thread(
+					[&](int start, int end, int id) {
+						for (int i = start; i < end; ++i) {
+							auto tempCT = scheme.multByConst(CTs[i],
+									wmatrix[i][outputidx], logp);
+							tempCT.reScaleByAndEqual(logp);
+							if (outputCT.logp > tempCT.logp)
+								outputCT.reScaleByAndEqual(
+										outputCT.logp - tempCT.logp);
+							if (outputCT.logp < tempCT.logp)
+								tempCT.reScaleByAndEqual(
+										tempCT.logp - outputCT.logp);
+							if (outputCT.logq > tempCT.logq)
+								outputCT.modDownToAndEqual(tempCT.logq);
+							if (outputCT.logq < tempCT.logq)
+								tempCT.modDownToAndEqual(outputCT.logq);
+
+							{
+								std::lock_guard < std::mutex > lock(mtx);
+								scheme.addAndEqual(outputCT, tempCT);
+							}
+
+							tempCT.free();
+
+							std::cout << "Thread " << id << ": i = " << i
+									<< std::endl;
+						}
+						tasksCompleted += (end - start);
+					}, startIndex, endIndex, i);
+
+			startIndex = endIndex;
 		}
 
+		// 等待线程池中所有线程执行完毕
+		for (auto &thread : threadPool) {
+			thread.join();
+		}
+
+		// 检查任务是否全部完成
+		if (tasksCompleted == N) {
+			std::cout << "All tasks completed." << std::endl;
+		} else {
+			std::cout << "Some tasks are not completed." << std::endl;
+		}
 
 		cout << "// Input > Layer1 > Layer2" << endl;
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -472,7 +554,6 @@ cout << mvec1[i] << "\t";
 
 		ctxx = scheme.multByConst(ctxx, NNdate[9][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -497,7 +578,6 @@ cout << mvec1[i] << "\t";
 	for (long i = 0; i < slots; ++i)
 		cout << dvec2[i] << ",\t";
 	cout << endl << endl << endl;
-
 
 	timeutils.stop("Input > Layer1 > Layer2 ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
@@ -531,30 +611,64 @@ cout << mvec1[i] << "\t";
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
-        #pragma omp parallel for
-		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
-				tempCT.reScaleByAndEqual(logp);
-				if (outputCT.logp > tempCT.logp)
-				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
-				if (outputCT.logp < tempCT.logp)
-				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
-				if (outputCT.logq > tempCT.logq)
-				outputCT.modDownToAndEqual(tempCT.logq);
-				if (outputCT.logq < tempCT.logq)
-				tempCT.modDownToAndEqual(outputCT.logq);
+		tasksCompleted = 0;
+		// 分配任务给线程池中的线程
+		chunkSize = hidden_units / numThreads;
+		remainder = hidden_units % numThreads;
+		startIndex = 0;
+		for (int i = 0; i < numThreads; ++i) {
+			int endIndex = startIndex + chunkSize;
+			if (i < remainder) {
+				endIndex++; // 前 remainder 个线程多执行一次
+			}
 
-				#pragma omp critical
-				scheme.addAndEqual(outputCT, tempCT);
-				tempCT.free();
+			// 创建线程并执行任务
+			threadPool[i] = std::thread(
+					[&](int start, int end, int id) {
+						for (int i = start; i < end; ++i) {
+							auto tempCT = scheme.multByConst(CTs[i],
+									wmatrix[i][outputidx], logp);
+							tempCT.reScaleByAndEqual(logp);
+							if (outputCT.logp > tempCT.logp)
+								outputCT.reScaleByAndEqual(
+										outputCT.logp - tempCT.logp);
+							if (outputCT.logp < tempCT.logp)
+								tempCT.reScaleByAndEqual(
+										tempCT.logp - outputCT.logp);
+							if (outputCT.logq > tempCT.logq)
+								outputCT.modDownToAndEqual(tempCT.logq);
+							if (outputCT.logq < tempCT.logq)
+								tempCT.modDownToAndEqual(outputCT.logq);
+
+							{
+								std::lock_guard < std::mutex > lock(mtx);
+								scheme.addAndEqual(outputCT, tempCT);
+							}
+
+							tempCT.free();
+
+							std::cout << "Thread " << id << ": i = " << i
+									<< std::endl;
+						}
+						tasksCompleted += (end - start);
+					}, startIndex, endIndex, i);
+
+			startIndex = endIndex;
+		}
+
+		// 等待线程池中所有线程执行完毕
+		for (auto &thread : threadPool) {
+			thread.join();
+		}
+
+		// 检查任务是否全部完成
+		if (tasksCompleted == N) {
+			std::cout << "All tasks completed." << std::endl;
+		} else {
+			std::cout << "Some tasks are not completed." << std::endl;
 		}
 
 		cout << "// Input > Layer1 > Layer2 > Layer3" << endl;
-
-
-
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -567,7 +681,6 @@ cout << mvec1[i] << "\t";
 
 		ctxx = scheme.multByConst(ctxx, NNdate[14][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -625,27 +738,64 @@ cout << mvec1[i] << "\t";
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
-        #pragma omp parallel for
-		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
-				tempCT.reScaleByAndEqual(logp);
-				if (outputCT.logp > tempCT.logp)
-				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
-				if (outputCT.logp < tempCT.logp)
-				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
-				if (outputCT.logq > tempCT.logq)
-				outputCT.modDownToAndEqual(tempCT.logq);
-				if (outputCT.logq < tempCT.logq)
-				tempCT.modDownToAndEqual(outputCT.logq);
+		tasksCompleted = 0;
+		// 分配任务给线程池中的线程
+		chunkSize = hidden_units / numThreads;
+		remainder = hidden_units % numThreads;
+		startIndex = 0;
+		for (int i = 0; i < numThreads; ++i) {
+			int endIndex = startIndex + chunkSize;
+			if (i < remainder) {
+				endIndex++; // 前 remainder 个线程多执行一次
+			}
 
-				#pragma omp critical
-				scheme.addAndEqual(outputCT, tempCT);
-				tempCT.free();
+			// 创建线程并执行任务
+			threadPool[i] = std::thread(
+					[&](int start, int end, int id) {
+						for (int i = start; i < end; ++i) {
+							auto tempCT = scheme.multByConst(CTs[i],
+									wmatrix[i][outputidx], logp);
+							tempCT.reScaleByAndEqual(logp);
+							if (outputCT.logp > tempCT.logp)
+								outputCT.reScaleByAndEqual(
+										outputCT.logp - tempCT.logp);
+							if (outputCT.logp < tempCT.logp)
+								tempCT.reScaleByAndEqual(
+										tempCT.logp - outputCT.logp);
+							if (outputCT.logq > tempCT.logq)
+								outputCT.modDownToAndEqual(tempCT.logq);
+							if (outputCT.logq < tempCT.logq)
+								tempCT.modDownToAndEqual(outputCT.logq);
+
+							{
+								std::lock_guard < std::mutex > lock(mtx);
+								scheme.addAndEqual(outputCT, tempCT);
+							}
+
+							tempCT.free();
+
+							std::cout << "Thread " << id << ": i = " << i
+									<< std::endl;
+						}
+						tasksCompleted += (end - start);
+					}, startIndex, endIndex, i);
+
+			startIndex = endIndex;
+		}
+
+		// 等待线程池中所有线程执行完毕
+		for (auto &thread : threadPool) {
+			thread.join();
+		}
+
+		// 检查任务是否全部完成
+		if (tasksCompleted == N) {
+			std::cout << "All tasks completed." << std::endl;
+		} else {
+			std::cout << "Some tasks are not completed." << std::endl;
 		}
 
 		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4" << endl;
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -658,7 +808,6 @@ cout << mvec1[i] << "\t";
 
 		ctxx = scheme.multByConst(ctxx, NNdate[19][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -716,27 +865,64 @@ cout << mvec1[i] << "\t";
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
-        #pragma omp parallel for
-		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
-				tempCT.reScaleByAndEqual(logp);
-				if (outputCT.logp > tempCT.logp)
-				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
-				if (outputCT.logp < tempCT.logp)
-				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
-				if (outputCT.logq > tempCT.logq)
-				outputCT.modDownToAndEqual(tempCT.logq);
-				if (outputCT.logq < tempCT.logq)
-				tempCT.modDownToAndEqual(outputCT.logq);
+		tasksCompleted = 0;
+		// 分配任务给线程池中的线程
+		chunkSize = hidden_units / numThreads;
+		remainder = hidden_units % numThreads;
+		startIndex = 0;
+		for (int i = 0; i < numThreads; ++i) {
+			int endIndex = startIndex + chunkSize;
+			if (i < remainder) {
+				endIndex++; // 前 remainder 个线程多执行一次
+			}
 
-				#pragma omp critical
-				scheme.addAndEqual(outputCT, tempCT);
-				tempCT.free();
+			// 创建线程并执行任务
+			threadPool[i] = std::thread(
+					[&](int start, int end, int id) {
+						for (int i = start; i < end; ++i) {
+							auto tempCT = scheme.multByConst(CTs[i],
+									wmatrix[i][outputidx], logp);
+							tempCT.reScaleByAndEqual(logp);
+							if (outputCT.logp > tempCT.logp)
+								outputCT.reScaleByAndEqual(
+										outputCT.logp - tempCT.logp);
+							if (outputCT.logp < tempCT.logp)
+								tempCT.reScaleByAndEqual(
+										tempCT.logp - outputCT.logp);
+							if (outputCT.logq > tempCT.logq)
+								outputCT.modDownToAndEqual(tempCT.logq);
+							if (outputCT.logq < tempCT.logq)
+								tempCT.modDownToAndEqual(outputCT.logq);
+
+							{
+								std::lock_guard < std::mutex > lock(mtx);
+								scheme.addAndEqual(outputCT, tempCT);
+							}
+
+							tempCT.free();
+
+							std::cout << "Thread " << id << ": i = " << i
+									<< std::endl;
+						}
+						tasksCompleted += (end - start);
+					}, startIndex, endIndex, i);
+
+			startIndex = endIndex;
+		}
+
+		// 等待线程池中所有线程执行完毕
+		for (auto &thread : threadPool) {
+			thread.join();
+		}
+
+		// 检查任务是否全部完成
+		if (tasksCompleted == N) {
+			std::cout << "All tasks completed." << std::endl;
+		} else {
+			std::cout << "Some tasks are not completed." << std::endl;
 		}
 
 		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5" << endl;
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -749,7 +935,6 @@ cout << mvec1[i] << "\t";
 
 		ctxx = scheme.multByConst(ctxx, NNdate[24][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -765,7 +950,8 @@ cout << mvec1[i] << "\t";
 		ctxx.free();
 	}
 
-	cout << endl << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5" << endl;
+	cout << endl << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5"
+			<< endl;
 	//timeutils.start("Decrypt batch");
 	auto dvec5 = scheme.decrypt(secretKey, outputCTs[0]);
 	//timeutils.stop("Decrypt batch");
@@ -778,7 +964,8 @@ cout << mvec1[i] << "\t";
 	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5  ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 
-	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6  ");
+	timeutils.start(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6  ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -807,27 +994,65 @@ cout << mvec1[i] << "\t";
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
-        #pragma omp parallel for
-		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
-				tempCT.reScaleByAndEqual(logp);
-				if (outputCT.logp > tempCT.logp)
-				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
-				if (outputCT.logp < tempCT.logp)
-				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
-				if (outputCT.logq > tempCT.logq)
-				outputCT.modDownToAndEqual(tempCT.logq);
-				if (outputCT.logq < tempCT.logq)
-				tempCT.modDownToAndEqual(outputCT.logq);
+		tasksCompleted = 0;
+		// 分配任务给线程池中的线程
+		chunkSize = hidden_units / numThreads;
+		remainder = hidden_units % numThreads;
+		startIndex = 0;
+		for (int i = 0; i < numThreads; ++i) {
+			int endIndex = startIndex + chunkSize;
+			if (i < remainder) {
+				endIndex++; // 前 remainder 个线程多执行一次
+			}
 
-				#pragma omp critical
-				scheme.addAndEqual(outputCT, tempCT);
-				tempCT.free();
+			// 创建线程并执行任务
+			threadPool[i] = std::thread(
+					[&](int start, int end, int id) {
+						for (int i = start; i < end; ++i) {
+							auto tempCT = scheme.multByConst(CTs[i],
+									wmatrix[i][outputidx], logp);
+							tempCT.reScaleByAndEqual(logp);
+							if (outputCT.logp > tempCT.logp)
+								outputCT.reScaleByAndEqual(
+										outputCT.logp - tempCT.logp);
+							if (outputCT.logp < tempCT.logp)
+								tempCT.reScaleByAndEqual(
+										tempCT.logp - outputCT.logp);
+							if (outputCT.logq > tempCT.logq)
+								outputCT.modDownToAndEqual(tempCT.logq);
+							if (outputCT.logq < tempCT.logq)
+								tempCT.modDownToAndEqual(outputCT.logq);
+
+							{
+								std::lock_guard < std::mutex > lock(mtx);
+								scheme.addAndEqual(outputCT, tempCT);
+							}
+
+							tempCT.free();
+
+							std::cout << "Thread " << id << ": i = " << i
+									<< std::endl;
+						}
+						tasksCompleted += (end - start);
+					}, startIndex, endIndex, i);
+
+			startIndex = endIndex;
 		}
 
-		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6" << endl;
+		// 等待线程池中所有线程执行完毕
+		for (auto &thread : threadPool) {
+			thread.join();
+		}
 
+		// 检查任务是否全部完成
+		if (tasksCompleted == N) {
+			std::cout << "All tasks completed." << std::endl;
+		} else {
+			std::cout << "Some tasks are not completed." << std::endl;
+		}
 
+		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6"
+				<< endl;
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -840,7 +1065,6 @@ cout << mvec1[i] << "\t";
 
 		ctxx = scheme.multByConst(ctxx, NNdate[29][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -856,8 +1080,9 @@ cout << mvec1[i] << "\t";
 		ctxx.free();
 	}
 
-
-	cout << endl << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6" << endl;
+	cout << endl
+			<< "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6"
+			<< endl;
 	//timeutils.start("Decrypt batch");
 	auto dvec6 = scheme.decrypt(secretKey, outputCTs[0]);
 	//timeutils.stop("Decrypt batch");
@@ -867,10 +1092,12 @@ cout << mvec1[i] << "\t";
 		cout << dvec6[i] << ",\t";
 	cout << endl << endl << endl;
 
-	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6  ");
+	timeutils.stop(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6  ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 
-	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7  ");
+	timeutils.start(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7  ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -899,28 +1126,66 @@ cout << mvec1[i] << "\t";
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
-        #pragma omp parallel for
-		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
-				tempCT.reScaleByAndEqual(logp);
-				if (outputCT.logp > tempCT.logp)
-				outputCT.reScaleByAndEqual(outputCT.logp - tempCT.logp);
-				if (outputCT.logp < tempCT.logp)
-				tempCT.reScaleByAndEqual(tempCT.logp - outputCT.logp);
-				if (outputCT.logq > tempCT.logq)
-				outputCT.modDownToAndEqual(tempCT.logq);
-				if (outputCT.logq < tempCT.logq)
-				tempCT.modDownToAndEqual(outputCT.logq);
+		tasksCompleted = 0;
+		// 分配任务给线程池中的线程
+		chunkSize = hidden_units / numThreads;
+		remainder = hidden_units % numThreads;
+		startIndex = 0;
+		for (int i = 0; i < numThreads; ++i) {
+			int endIndex = startIndex + chunkSize;
+			if (i < remainder) {
+				endIndex++; // 前 remainder 个线程多执行一次
+			}
 
-				#pragma omp critical
-				scheme.addAndEqual(outputCT, tempCT);
-				tempCT.free();
+			// 创建线程并执行任务
+			threadPool[i] = std::thread(
+					[&](int start, int end, int id) {
+						for (int i = start; i < end; ++i) {
+							auto tempCT = scheme.multByConst(CTs[i],
+									wmatrix[i][outputidx], logp);
+							tempCT.reScaleByAndEqual(logp);
+							if (outputCT.logp > tempCT.logp)
+								outputCT.reScaleByAndEqual(
+										outputCT.logp - tempCT.logp);
+							if (outputCT.logp < tempCT.logp)
+								tempCT.reScaleByAndEqual(
+										tempCT.logp - outputCT.logp);
+							if (outputCT.logq > tempCT.logq)
+								outputCT.modDownToAndEqual(tempCT.logq);
+							if (outputCT.logq < tempCT.logq)
+								tempCT.modDownToAndEqual(outputCT.logq);
+
+							{
+								std::lock_guard < std::mutex > lock(mtx);
+								scheme.addAndEqual(outputCT, tempCT);
+							}
+
+							tempCT.free();
+
+							std::cout << "Thread " << id << ": i = " << i
+									<< std::endl;
+						}
+						tasksCompleted += (end - start);
+					}, startIndex, endIndex, i);
+
+			startIndex = endIndex;
 		}
 
-		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7" << endl;
+		// 等待线程池中所有线程执行完毕
+		for (auto &thread : threadPool) {
+			thread.join();
+		}
 
+		// 检查任务是否全部完成
+		if (tasksCompleted == N) {
+			std::cout << "All tasks completed." << std::endl;
+		} else {
+			std::cout << "Some tasks are not completed." << std::endl;
+		}
 
-
+		cout
+				<< "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7"
+				<< endl;
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -933,7 +1198,6 @@ cout << mvec1[i] << "\t";
 
 		ctxx = scheme.multByConst(ctxx, NNdate[34][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -949,7 +1213,9 @@ cout << mvec1[i] << "\t";
 		ctxx.free();
 	}
 
-	cout << endl << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7" << endl;
+	cout << endl
+			<< "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7"
+			<< endl;
 	//timeutils.start("Decrypt batch");
 	auto dvec7 = scheme.decrypt(secretKey, outputCTs[0]);
 	//timeutils.stop("Decrypt batch");
@@ -958,10 +1224,12 @@ cout << mvec1[i] << "\t";
 	for (long i = 0; i < slots; ++i)
 		cout << dvec7[i] << ",\t";
 	cout << endl << endl << endl;
-	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7  ");
+	timeutils.stop(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7  ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output
-	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output ");
+	timeutils.start(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output ");
 	auto mres = EvaluatorUtils::randomRealArray(slots);
 	for (long i = 0; i < slots; ++i) {
 		mres[i] = 0;
@@ -969,35 +1237,77 @@ cout << mvec1[i] << "\t";
 	auto resultCT = scheme.encrypt(mres, slots, outputCTs[0].logp,
 			outputCTs[0].logq);
 
-	#pragma omp parallel for
-	for (long i = 0; i < hidden_units; ++i) {
+	tasksCompleted = 0;
+	// 分配任务给线程池中的线程
+	chunkSize = hidden_units / numThreads;
+	remainder = hidden_units % numThreads;
+	startIndex = 0;
+	for (int i = 0; i < numThreads; ++i) {
+		int endIndex = startIndex + chunkSize;
+		if (i < remainder) {
+			endIndex++; // 前 remainder 个线程多执行一次
+		}
 
-		outputCTs[i] = scheme.multByConst(outputCTs[i], NNdate[35][i], logp);
+		// 创建线程并执行任务
+		threadPool[i] = std::thread(
+				[&](int start, int end, int id) {
+					for (int i = start; i < end; ++i) {
 
-		outputCTs[i].reScaleByAndEqual(logp);
+						outputCTs[i] = scheme.multByConst(outputCTs[i],
+								NNdate[35][i], logp);
 
-		if (resultCT.logp > outputCTs[i].logp)
-			resultCT.reScaleByAndEqual(resultCT.logp - outputCTs[i].logp);
-		if (resultCT.logp < outputCTs[i].logp)
-			outputCTs[i].reScaleByAndEqual(outputCTs[i].logp - resultCT.logp);
-		if (resultCT.logq > outputCTs[i].logq)
-			resultCT.modDownToAndEqual(outputCTs[i].logq);
-		if (resultCT.logq < outputCTs[i].logq)
-			outputCTs[i].modDownToAndEqual(resultCT.logq);
+						outputCTs[i].reScaleByAndEqual(logp);
 
-		#pragma omp critical
-		scheme.addAndEqual(resultCT, outputCTs[i]);
+						if (resultCT.logp > outputCTs[i].logp)
+							resultCT.reScaleByAndEqual(
+									resultCT.logp - outputCTs[i].logp);
+						if (resultCT.logp < outputCTs[i].logp)
+							outputCTs[i].reScaleByAndEqual(
+									outputCTs[i].logp - resultCT.logp);
+						if (resultCT.logq > outputCTs[i].logq)
+							resultCT.modDownToAndEqual(outputCTs[i].logq);
+						if (resultCT.logq < outputCTs[i].logq)
+							outputCTs[i].modDownToAndEqual(resultCT.logq);
 
+						{
+							std::lock_guard < std::mutex > lock(mtx);
+							scheme.addAndEqual(resultCT, outputCTs[i]);
+
+						}
+
+						std::cout << "Thread " << id << ": i = " << i
+								<< std::endl;
+					}
+					tasksCompleted += (end - start);
+				}, startIndex, endIndex, i);
+
+		startIndex = endIndex;
 	}
+
+	// 等待线程池中所有线程执行完毕
+	for (auto &thread : threadPool) {
+		thread.join();
+	}
+
+	// 检查任务是否全部完成
+	if (tasksCompleted == N) {
+		std::cout << "All tasks completed." << std::endl;
+	} else {
+		std::cout << "Some tasks are not completed." << std::endl;
+	}
+
 	scheme.addConstAndEqual(resultCT, NNdate[36][0]);
-	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output ");
+	timeutils.stop(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output ");
 	totaltime.stop("The Total Time Consumed");
 
 // END: Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output
 
 	CTs[0].copy(resultCT);
 
-	cout << endl << "END: Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output" << endl;
+	cout << endl
+			<< "END: Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output"
+			<< endl;
 	timeutils.start("Decrypt batch");
 	auto dvec1 = scheme.decrypt(secretKey, CTs[0]);
 	timeutils.stop("Decrypt batch");
@@ -1007,47 +1317,42 @@ cout << mvec1[i] << "\t";
 		cout << dvec1[i] << ",\t";
 	cout << endl << endl << endl;
 
-
-	cout << "Model provider : begin : CurrentRSS (MB): " << ( MyTools::getCurrentRSS() /1024.0/1024.0 ) << endl;
-	cout << "Model provider : begin : PeakRSS    (MB): " << ( MyTools::getPeakRSS() /1024.0/1024.0 )    << endl;
+	cout << "Model provider : begin : CurrentRSS (MB): "
+			<< (MyTools::getCurrentRSS() / 1024.0 / 1024.0) << endl;
+	cout << "Model provider : begin : PeakRSS    (MB): "
+			<< (MyTools::getPeakRSS() / 1024.0 / 1024.0) << endl;
 //////////////////////////////////////////////////////////////////////////////////////////
-	   std::ofstream file("NNover30Plot_OpenMP.csv");
-    if (!file.is_open()) {
-        std::cerr << "Error: Failed to open file for writing." << std::endl;
-        return;
-    }
+	std::ofstream file("NNover30Plot_CPP11Thread.csv");
+	if (!file.is_open()) {
+		std::cerr << "Error: Failed to open file for writing." << std::endl;
+		return;
+	}
 
-    // 写入列标题
-    file << "X,SigmoidX,Y" << std::endl;
+	// 写入列标题
+	file << "X,SigmoidX,Y" << std::endl;
 
-    // 写入数据
-    for (long i = 0; ; ++i) {
-        if (mvec1[i] > 30)
-            break;
+	// 写入数据
+	for (long i = 0;; ++i) {
+		if (mvec1[i] > 30)
+			break;
 
-        double x = -30 + 0.01 * i;
-        double sigmoidx =  1 / (1 + std::exp(-x)) - 0.5;
-        double y = dvec1[i];
+		double x = -30 + 0.01 * i;
+		double sigmoidx = 1 / (1 + std::exp(-x)) - 0.5;
+		double y = dvec1[i];
 
-        file << x << "," << sigmoidx  << "," << y << std::endl;
+		file << x << "," << sigmoidx << "," << y << std::endl;
 
-    }
+	}
 
-    file.close();
+	file.close();
 //////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 	for (long i = 0; i < hidden_units; ++i) {
 		CTs[i].free();
 		outputCTs[i].free();
 	}
 
-	
 }
-
-
-
 
 void MyMethods::NNover50() {
 
@@ -1136,10 +1441,10 @@ void MyMethods::NNover50() {
 
 		}
 		NTL_EXEC_RANGE_END
-		timeutils.stop("Input > Layer1 ");
+	timeutils.stop("Input > Layer1 ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2
-		timeutils.start("Input > Layer1 > Layer2 ");
+	timeutils.start("Input > Layer1 > Layer2 ");
 	double **wmatrix = new double*[hidden_units];
 	//cout << endl << "wmatrix: " << endl;
 	for (int i = 0; i < hidden_units; ++i) {
@@ -1182,15 +1487,13 @@ void MyMethods::NNover50() {
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+			NTL_EXEC_RANGE_END
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
+			scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+			tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -1203,7 +1506,6 @@ void MyMethods::NNover50() {
 
 		ctxx = scheme.multByConst(ctxx, NNdate[9][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -1218,10 +1520,10 @@ void MyMethods::NNover50() {
 		ctx.free();
 		ctxx.free();
 	}
-		timeutils.stop("Input > Layer1 > Layer2 ");
+	timeutils.stop("Input > Layer1 > Layer2 ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3
-		timeutils.start("Input > Layer1 > Layer2 > Layer3 ");
+	timeutils.start("Input > Layer1 > Layer2 > Layer3 ");
 
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
@@ -1268,15 +1570,13 @@ void MyMethods::NNover50() {
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+			NTL_EXEC_RANGE_END
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
+			scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+			tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -1289,7 +1589,6 @@ void MyMethods::NNover50() {
 
 		ctxx = scheme.multByConst(ctxx, NNdate[14][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -1304,10 +1603,10 @@ void MyMethods::NNover50() {
 		ctx.free();
 		ctxx.free();
 	}
-		timeutils.stop("Input > Layer1 > Layer2 > Layer3 ");
+	timeutils.stop("Input > Layer1 > Layer2 > Layer3 ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 
-		timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4  ");
+	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4  ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -1353,15 +1652,13 @@ void MyMethods::NNover50() {
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+			NTL_EXEC_RANGE_END
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
+			scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+			tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -1374,7 +1671,6 @@ void MyMethods::NNover50() {
 
 		ctxx = scheme.multByConst(ctxx, NNdate[19][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -1389,10 +1685,10 @@ void MyMethods::NNover50() {
 		ctx.free();
 		ctxx.free();
 	}
-		timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4  ");
+	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4  ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 
-		timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 ");
+	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -1438,15 +1734,13 @@ void MyMethods::NNover50() {
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+			NTL_EXEC_RANGE_END
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
+			scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+			tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -1459,7 +1753,6 @@ void MyMethods::NNover50() {
 
 		ctxx = scheme.multByConst(ctxx, NNdate[24][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -1474,10 +1767,11 @@ void MyMethods::NNover50() {
 		ctx.free();
 		ctxx.free();
 	}
-		timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 ");
+	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 
-		timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 ");
+	timeutils.start(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -1523,15 +1817,13 @@ void MyMethods::NNover50() {
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+			NTL_EXEC_RANGE_END
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
+			scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+			tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -1544,7 +1836,6 @@ void MyMethods::NNover50() {
 
 		ctxx = scheme.multByConst(ctxx, NNdate[29][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -1559,10 +1850,12 @@ void MyMethods::NNover50() {
 		ctx.free();
 		ctxx.free();
 	}
-		timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 ");
+	timeutils.stop(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 
-		timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 ");
+	timeutils.start(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -1608,16 +1901,13 @@ void MyMethods::NNover50() {
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+			NTL_EXEC_RANGE_END
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
+			scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+			tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
-
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -1630,7 +1920,6 @@ void MyMethods::NNover50() {
 
 		ctxx = scheme.multByConst(ctxx, NNdate[34][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -1646,10 +1935,12 @@ void MyMethods::NNover50() {
 		ctxx.free();
 	}
 
-		timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 ");
+	timeutils.stop(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 
-		timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8  ");
+	timeutils.start(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8  ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -1695,15 +1986,13 @@ void MyMethods::NNover50() {
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+			NTL_EXEC_RANGE_END
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
+			scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+			tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -1716,7 +2005,6 @@ void MyMethods::NNover50() {
 
 		ctxx = scheme.multByConst(ctxx, NNdate[39][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -1732,11 +2020,12 @@ void MyMethods::NNover50() {
 		ctxx.free();
 	}
 
-
-		timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8  ");
+	timeutils.stop(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8  ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 
-		timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9  ");
+	timeutils.start(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9  ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -1782,16 +2071,13 @@ void MyMethods::NNover50() {
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+			NTL_EXEC_RANGE_END
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
+			scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+			tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
-
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -1804,7 +2090,6 @@ void MyMethods::NNover50() {
 
 		ctxx = scheme.multByConst(ctxx, NNdate[44][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -1820,11 +2105,12 @@ void MyMethods::NNover50() {
 		ctxx.free();
 	}
 
-
-		timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9  ");
+	timeutils.stop(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9  ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Output 
-		timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Output  ");
+	timeutils.start(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Output  ");
 	auto mres = EvaluatorUtils::randomRealArray(slots);
 	for (long i = 0; i < slots; ++i) {
 		mres[i] = 0;
@@ -1851,7 +2137,8 @@ void MyMethods::NNover50() {
 	}
 	scheme.addConstAndEqual(resultCT, NNdate[46][0]);
 
-	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Output  ");
+	timeutils.stop(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Output  ");
 
 	totaltime.stop("The Total Time Consumed");
 
@@ -1874,47 +2161,42 @@ void MyMethods::NNover50() {
 		cout << dvec1[i] << ",\t";
 	cout << endl << endl << endl;
 
-
-
-	cout << "Model provider : begin : CurrentRSS (MB): " << ( MyTools::getCurrentRSS() /1024.0/1024.0 ) << endl;
-	cout << "Model provider : begin : PeakRSS    (MB): " << ( MyTools::getPeakRSS() /1024.0/1024.0 )    << endl;
+	cout << "Model provider : begin : CurrentRSS (MB): "
+			<< (MyTools::getCurrentRSS() / 1024.0 / 1024.0) << endl;
+	cout << "Model provider : begin : PeakRSS    (MB): "
+			<< (MyTools::getPeakRSS() / 1024.0 / 1024.0) << endl;
 //////////////////////////////////////////////////////////////////////////////////////////
-	   std::ofstream file("NNover50Plot.csv");
-    if (!file.is_open()) {
-        std::cerr << "Error: Failed to open file for writing." << std::endl;
-        return;
-    }
+	std::ofstream file("NNover50Plot.csv");
+	if (!file.is_open()) {
+		std::cerr << "Error: Failed to open file for writing." << std::endl;
+		return;
+	}
 
-    // 写入列标题
-    file << "X,SigmoidX,Y" << std::endl;
+	// 写入列标题
+	file << "X,SigmoidX,Y" << std::endl;
 
-    // 写入数据
-    for (long i = 0; ; ++i) {
-        if (mvec1[i] > 50)
-            break;
+	// 写入数据
+	for (long i = 0;; ++i) {
+		if (mvec1[i] > 50)
+			break;
 
-        double x = -50 + 0.01 * i;
-        double sigmoidx =  1 / (1 + std::exp(-x)) - 0.5;
-        double y = dvec1[i];
+		double x = -50 + 0.01 * i;
+		double sigmoidx = 1 / (1 + std::exp(-x)) - 0.5;
+		double y = dvec1[i];
 
-        file << x << "," << sigmoidx  << "," << y << std::endl;
+		file << x << "," << sigmoidx << "," << y << std::endl;
 
-    }
+	}
 
-    file.close();
+	file.close();
 //////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 	for (long i = 0; i < hidden_units; ++i) {
 		CTs[i].free();
 		outputCTs[i].free();
 	}
 
-
 }
-
-
 
 void MyMethods::NNover70() {
 
@@ -1962,7 +2244,6 @@ void MyMethods::NNover70() {
 	timeutils.start("Encrypt one batch");
 	Ciphertext cipher1 = scheme.encrypt(mvec1, slots, logp, logQ);
 	timeutils.stop("Encrypt one batch");
-
 
 	TimeUtils totaltime;
 	totaltime.start("The Total Time Consumed");
@@ -2050,16 +2331,13 @@ void MyMethods::NNover70() {
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+			NTL_EXEC_RANGE_END
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
+			scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+			tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
-
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -2072,7 +2350,6 @@ void MyMethods::NNover70() {
 
 		ctxx = scheme.multByConst(ctxx, NNdate[9][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -2137,16 +2414,13 @@ void MyMethods::NNover70() {
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+			NTL_EXEC_RANGE_END
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
+			scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+			tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
-
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -2159,7 +2433,6 @@ void MyMethods::NNover70() {
 
 		ctxx = scheme.multByConst(ctxx, NNdate[14][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -2224,16 +2497,13 @@ void MyMethods::NNover70() {
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+			NTL_EXEC_RANGE_END
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
+			scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+			tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
-
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -2246,7 +2516,6 @@ void MyMethods::NNover70() {
 
 		ctxx = scheme.multByConst(ctxx, NNdate[19][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -2311,16 +2580,13 @@ void MyMethods::NNover70() {
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+			NTL_EXEC_RANGE_END
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
+			scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+			tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
-
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -2333,7 +2599,6 @@ void MyMethods::NNover70() {
 
 		ctxx = scheme.multByConst(ctxx, NNdate[24][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -2352,7 +2617,8 @@ void MyMethods::NNover70() {
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 
-	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 ");
+	timeutils.start(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -2398,17 +2664,13 @@ void MyMethods::NNover70() {
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+			NTL_EXEC_RANGE_END
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
+			scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+			tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
-
-
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -2421,7 +2683,6 @@ void MyMethods::NNover70() {
 
 		ctxx = scheme.multByConst(ctxx, NNdate[29][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -2436,11 +2697,13 @@ void MyMethods::NNover70() {
 		ctx.free();
 		ctxx.free();
 	}
-	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 ");
+	timeutils.stop(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 ");
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 
-	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 ");
+	timeutils.start(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -2486,16 +2749,13 @@ void MyMethods::NNover70() {
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+			NTL_EXEC_RANGE_END
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
+			scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+			tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
-
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -2508,7 +2768,6 @@ void MyMethods::NNover70() {
 
 		ctxx = scheme.multByConst(ctxx, NNdate[34][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -2523,12 +2782,13 @@ void MyMethods::NNover70() {
 		ctx.free();
 		ctxx.free();
 	}
-	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 ");
-
+	timeutils.stop(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 ");
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 
-	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 ");
+	timeutils.start(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -2574,15 +2834,13 @@ void MyMethods::NNover70() {
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+			NTL_EXEC_RANGE_END
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
+			scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+			tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -2595,7 +2853,6 @@ void MyMethods::NNover70() {
 
 		ctxx = scheme.multByConst(ctxx, NNdate[39][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -2610,13 +2867,13 @@ void MyMethods::NNover70() {
 		ctx.free();
 		ctxx.free();
 	}
-	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 ");
-
-
+	timeutils.stop(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 ");
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 
-	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 ");
+	timeutils.start(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -2662,16 +2919,13 @@ void MyMethods::NNover70() {
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+			NTL_EXEC_RANGE_END
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
+			scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+			tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
-
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -2684,7 +2938,6 @@ void MyMethods::NNover70() {
 
 		ctxx = scheme.multByConst(ctxx, NNdate[44][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -2699,12 +2952,13 @@ void MyMethods::NNover70() {
 		ctx.free();
 		ctxx.free();
 	}
-	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 ");
-
+	timeutils.stop(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 ");
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 
-	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 ");
+	timeutils.start(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 ");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -2750,16 +3004,13 @@ void MyMethods::NNover70() {
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+			NTL_EXEC_RANGE_END
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
+			scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+			tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
-
-
-
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -2772,7 +3023,6 @@ void MyMethods::NNover70() {
 
 		ctxx = scheme.multByConst(ctxx, NNdate[49][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -2787,11 +3037,13 @@ void MyMethods::NNover70() {
 		ctx.free();
 		ctxx.free();
 	}
-	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 ");
+	timeutils.stop(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 ");
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11 
-	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11");
+	timeutils.start(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11");
 	for (long i = 0; i < hidden_units; ++i)
 		CTs[i].copy(outputCTs[i]);
 
@@ -2837,16 +3089,13 @@ void MyMethods::NNover70() {
 				tempCTs[inputidx].copy(tempCT);
 				tempCT.free();
 			}
-		NTL_EXEC_RANGE_END
+			NTL_EXEC_RANGE_END
 
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-				scheme.addAndEqual(outputCT, tempCTs[inputidx]);
-				tempCTs[inputidx].free();
+			scheme.addAndEqual(outputCT, tempCTs[inputidx]);
+			tempCTs[inputidx].free();
 		}
 		delete[] tempCTs;
-
-
-			
 
 		Ciphertext ctx;
 		ctx.copy(outputCT);
@@ -2859,7 +3108,6 @@ void MyMethods::NNover70() {
 
 		ctxx = scheme.multByConst(ctxx, NNdate[54][0], logp);
 		ctxx.reScaleByAndEqual(logp);
-
 
 		ctx.modDownToAndEqual(ctxx.logq);
 
@@ -2874,12 +3122,13 @@ void MyMethods::NNover70() {
 		ctx.free();
 		ctxx.free();
 	}
-	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11");
-
+	timeutils.stop(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11");
 
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11 > Output 
-	timeutils.start("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11 > Output ");
+	timeutils.start(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11 > Output ");
 	auto mres = EvaluatorUtils::randomRealArray(slots);
 	for (long i = 0; i < slots; ++i) {
 		mres[i] = 0;
@@ -2905,9 +3154,10 @@ void MyMethods::NNover70() {
 
 	}
 	scheme.addConstAndEqual(resultCT, NNdate[56][0]);
-	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11 > Output ");
+	timeutils.stop(
+			"Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11 > Output ");
 	totaltime.stop("The Total Time Consumed");
-	
+
 // END: Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Layer8 > Layer9 > Layer10 > Layer11 > Output 
 
 	CTs[0].copy(resultCT);
@@ -2927,32 +3177,34 @@ void MyMethods::NNover70() {
 		cout << dvec1[i] << ",\t";
 	cout << endl << endl << endl;
 
-	cout << "Model provider : begin : CurrentRSS (MB): " << ( MyTools::getCurrentRSS() /1024.0/1024.0 ) << endl;
-	cout << "Model provider : begin : PeakRSS    (MB): " << ( MyTools::getPeakRSS() /1024.0/1024.0 )    << endl;
+	cout << "Model provider : begin : CurrentRSS (MB): "
+			<< (MyTools::getCurrentRSS() / 1024.0 / 1024.0) << endl;
+	cout << "Model provider : begin : PeakRSS    (MB): "
+			<< (MyTools::getPeakRSS() / 1024.0 / 1024.0) << endl;
 //////////////////////////////////////////////////////////////////////////////////////////
-	   std::ofstream file("NNover70Plot.csv");
-    if (!file.is_open()) {
-        std::cerr << "Error: Failed to open file for writing." << std::endl;
-        return;
-    }
+	std::ofstream file("NNover70Plot.csv");
+	if (!file.is_open()) {
+		std::cerr << "Error: Failed to open file for writing." << std::endl;
+		return;
+	}
 
-    // 写入列标题
-    file << "X,SigmoidX,Y" << std::endl;
+	// 写入列标题
+	file << "X,SigmoidX,Y" << std::endl;
 
-    // 写入数据
-    for (long i = 0; ; ++i) {
-        if (mvec1[i] > 70)
-            break;
+	// 写入数据
+	for (long i = 0;; ++i) {
+		if (mvec1[i] > 70)
+			break;
 
-        double x = -70 + 0.01 * i;
-        double sigmoidx =  1 / (1 + std::exp(-x)) - 0.5;
-        double y = dvec1[i];
+		double x = -70 + 0.01 * i;
+		double sigmoidx = 1 / (1 + std::exp(-x)) - 0.5;
+		double y = dvec1[i];
 
-        file << x << "," << sigmoidx  << "," << y << std::endl;
+		file << x << "," << sigmoidx << "," << y << std::endl;
 
-    }
+	}
 
-    file.close();
+	file.close();
 //////////////////////////////////////////////////////////////////////////////////////////
 
 	for (long i = 0; i < hidden_units; ++i) {
