@@ -462,6 +462,16 @@ void MyMethods::NNover30() {
 		std::cout << "Some tasks are not completed." << std::endl;
 	}
 
+	//timeutils.start("Decrypt batch");
+	auto dvec1 = scheme.decrypt(secretKey, CTs[0]);
+	//timeutils.stop("Decrypt batch");
+
+	cout << endl << endl << endl << "SDFS:" << endl;
+	for (long i = 0; i < slots; ++i)
+		cout << dvec1[i] << ",\t";
+	cout << endl << endl << endl;
+
+
 	timeutils.stop("Input > Layer1 ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2
