@@ -506,9 +506,13 @@ void MyMethods::NNover30() {
 			threadPool[i] = std::thread(
 					[&](int start, int end, int id) {
 						for (int j = start; j < end; ++j) {
+							std::lock_guard < std::mutex > lock(mtx);
+
 							auto tempCT = scheme.multByConst(CTs[j],
 									wmatrix[j][outputidx], logp);
 							tempCT.reScaleByAndEqual(logp);
+
+								
 							if (outputCT.logp > tempCT.logp)
 								outputCT.reScaleByAndEqual(
 										outputCT.logp - tempCT.logp);
@@ -520,10 +524,9 @@ void MyMethods::NNover30() {
 							if (outputCT.logq < tempCT.logq)
 								tempCT.modDownToAndEqual(outputCT.logq);
 
-							{
-								std::lock_guard < std::mutex > lock(mtx);
-								scheme.addAndEqual(outputCT, tempCT);
-							}
+
+							scheme.addAndEqual(outputCT, tempCT);
+							
 
 							tempCT.free();
 
@@ -633,6 +636,9 @@ void MyMethods::NNover30() {
 			threadPool[i] = std::thread(
 					[&](int start, int end, int id) {
 						for (int j = start; j < end; ++j) {
+							std::lock_guard < std::mutex > lock(mtx);
+
+
 							auto tempCT = scheme.multByConst(CTs[j],
 									wmatrix[j][outputidx], logp);
 							tempCT.reScaleByAndEqual(logp);
@@ -647,10 +653,10 @@ void MyMethods::NNover30() {
 							if (outputCT.logq < tempCT.logq)
 								tempCT.modDownToAndEqual(outputCT.logq);
 
-							{
-								std::lock_guard < std::mutex > lock(mtx);
+							
+								
 								scheme.addAndEqual(outputCT, tempCT);
-							}
+							
 
 							tempCT.free();
 
@@ -760,6 +766,8 @@ void MyMethods::NNover30() {
 			threadPool[i] = std::thread(
 					[&](int start, int end, int id) {
 						for (int j = start; j < end; ++j) {
+							std::lock_guard < std::mutex > lock(mtx);
+
 							auto tempCT = scheme.multByConst(CTs[j],
 									wmatrix[j][outputidx], logp);
 							tempCT.reScaleByAndEqual(logp);
@@ -774,10 +782,10 @@ void MyMethods::NNover30() {
 							if (outputCT.logq < tempCT.logq)
 								tempCT.modDownToAndEqual(outputCT.logq);
 
-							{
-								std::lock_guard < std::mutex > lock(mtx);
+							
+								
 								scheme.addAndEqual(outputCT, tempCT);
-							}
+							
 
 							tempCT.free();
 
@@ -887,6 +895,8 @@ void MyMethods::NNover30() {
 			threadPool[i] = std::thread(
 					[&](int start, int end, int id) {
 						for (int j = start; j < end; ++j) {
+							std::lock_guard < std::mutex > lock(mtx);
+
 							auto tempCT = scheme.multByConst(CTs[j],
 									wmatrix[j][outputidx], logp);
 							tempCT.reScaleByAndEqual(logp);
@@ -901,10 +911,9 @@ void MyMethods::NNover30() {
 							if (outputCT.logq < tempCT.logq)
 								tempCT.modDownToAndEqual(outputCT.logq);
 
-							{
-								std::lock_guard < std::mutex > lock(mtx);
+
 								scheme.addAndEqual(outputCT, tempCT);
-							}
+							
 
 							tempCT.free();
 
@@ -1016,6 +1025,8 @@ void MyMethods::NNover30() {
 			threadPool[i] = std::thread(
 					[&](int start, int end, int id) {
 						for (int j = start; j < end; ++j) {
+							std::lock_guard < std::mutex > lock(mtx);
+
 							auto tempCT = scheme.multByConst(CTs[j],
 									wmatrix[j][outputidx], logp);
 							tempCT.reScaleByAndEqual(logp);
@@ -1030,11 +1041,10 @@ void MyMethods::NNover30() {
 							if (outputCT.logq < tempCT.logq)
 								tempCT.modDownToAndEqual(outputCT.logq);
 
-							{
-								std::lock_guard < std::mutex > lock(mtx);
+							
+					
 								scheme.addAndEqual(outputCT, tempCT);
-							}
-
+							
 							tempCT.free();
 
 							std::cout << "Thread " << id << ": j = " << j
@@ -1148,6 +1158,8 @@ void MyMethods::NNover30() {
 			threadPool[i] = std::thread(
 					[&](int start, int end, int id) {
 						for (int j = start; j < end; ++j) {
+							std::lock_guard < std::mutex > lock(mtx);
+
 							auto tempCT = scheme.multByConst(CTs[j],
 									wmatrix[j][outputidx], logp);
 							tempCT.reScaleByAndEqual(logp);
@@ -1162,10 +1174,9 @@ void MyMethods::NNover30() {
 							if (outputCT.logq < tempCT.logq)
 								tempCT.modDownToAndEqual(outputCT.logq);
 
-							{
-								std::lock_guard < std::mutex > lock(mtx);
+
 								scheme.addAndEqual(outputCT, tempCT);
-							}
+							
 
 							tempCT.free();
 
@@ -1259,6 +1270,7 @@ void MyMethods::NNover30() {
 		threadPool[i] = std::thread(
 				[&](int start, int end, int id) {
 					for (int j = start; j < end; ++j) {
+						std::lock_guard < std::mutex > lock(mtx);
 
 						outputCTs[j] = scheme.multByConst(outputCTs[j],
 								NNdate[35][j], logp);
@@ -1276,11 +1288,10 @@ void MyMethods::NNover30() {
 						if (resultCT.logq < outputCTs[j].logq)
 							outputCTs[j].modDownToAndEqual(resultCT.logq);
 
-						{
-							std::lock_guard < std::mutex > lock(mtx);
+
 							scheme.addAndEqual(resultCT, outputCTs[j]);
 
-						}
+						
 
 						std::cout << "Thread " << id << ": j = " << j
 								<< std::endl;
