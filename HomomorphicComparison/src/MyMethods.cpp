@@ -100,10 +100,14 @@ public:
     }
 
     // 等待所有任务执行完毕
-    void wait() {
-        std::unique_lock<std::mutex> lock(queue_mutex);
-        condition.wait(lock, [this] { return tasksCompleted == tasks.size(); });
+// 等待所有任务执行完毕，并且等待所有线程执行完毕
+void wait() {
+    for (std::thread& worker : workers) {
+        if (worker.joinable()) {
+            worker.join();
+        }
     }
+}
 
 private:
     std::vector<std::thread> workers;
