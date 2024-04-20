@@ -456,7 +456,7 @@ cout << mvec1[i] << "\t";
 
     //#pragma omp parallel for
 		for (long i = 0; i < hidden_units; ++i) {
-			pool.enqueue([i, &cout_mutex, &CTs, &cipher1, &NNdate, logp] {
+			pool.enqueue([i, &cout_mutex, &CTs, &cipher1, &NNdate, logp, &scheme] {
             	std::lock_guard<std::mutex> lock(cout_mutex);
 
 
@@ -545,7 +545,7 @@ cout << mvec1[i] << "\t";
         //#pragma omp parallel for
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 
-			        pool.enqueue([i, &cout_mutex, &CTs, &wmatrix, logp, &outputCT] {
+			        pool.enqueue([i, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme] {
             std::lock_guard<std::mutex> lock(cout_mutex);
             
 
@@ -649,7 +649,7 @@ cout << mvec1[i] << "\t";
         //#pragma omp parallel for
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 
-			        pool.enqueue([i, &cout_mutex, &CTs, &wmatrix, logp, &outputCT] {
+			        pool.enqueue([i, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme] {
             std::lock_guard<std::mutex> lock(cout_mutex);
             
 
@@ -753,7 +753,7 @@ cout << mvec1[i] << "\t";
         //#pragma omp parallel for
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 
-			        pool.enqueue([i, &cout_mutex, &CTs, &wmatrix, logp, &outputCT] {
+			        pool.enqueue([inputidx, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme] {
             std::lock_guard<std::mutex> lock(cout_mutex);
             
 
@@ -855,7 +855,7 @@ cout << mvec1[i] << "\t";
         //#pragma omp parallel for
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 
-			        pool.enqueue([i, &cout_mutex, &CTs, &wmatrix, logp, &outputCT] {
+			        pool.enqueue([inputidx, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme] {
             std::lock_guard<std::mutex> lock(cout_mutex);
             
 
@@ -876,6 +876,7 @@ cout << mvec1[i] << "\t";
 				tempCT.free();
 
         });
+
 
 
 
@@ -957,7 +958,7 @@ cout << mvec1[i] << "\t";
         //#pragma omp parallel for
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 
-			        pool.enqueue([i, &cout_mutex, &CTs, &wmatrix, logp, &outputCT] {
+			        pool.enqueue([inputidx, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme] {
             std::lock_guard<std::mutex> lock(cout_mutex);
             
 
@@ -978,6 +979,7 @@ cout << mvec1[i] << "\t";
 				tempCT.free();
 
         });
+
 
 
 
@@ -1060,7 +1062,7 @@ cout << mvec1[i] << "\t";
         //#pragma omp parallel for
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
 
-			        pool.enqueue([i, &cout_mutex, &CTs, &wmatrix, logp, &outputCT] {
+			        pool.enqueue([inputidx, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme] {
             std::lock_guard<std::mutex> lock(cout_mutex);
             
 
@@ -1081,6 +1083,7 @@ cout << mvec1[i] << "\t";
 				tempCT.free();
 
         });
+
 
 
 
@@ -1140,7 +1143,7 @@ cout << mvec1[i] << "\t";
 
 	//#pragma omp parallel for
 	for (long i = 0; i < hidden_units; ++i) {
-        pool.enqueue([i, &cout_mutex, &outputCTs, &NNdate, logp, &resultCT] {
+        pool.enqueue([i, &cout_mutex, &outputCTs, &NNdate, logp, &resultCT, &scheme] {
             std::lock_guard<std::mutex> lock(cout_mutex);
 
 		outputCTs[i] = scheme.multByConst(outputCTs[i], NNdate[35][i], logp);
