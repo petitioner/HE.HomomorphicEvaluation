@@ -31,100 +31,6 @@
 
 #include <unistd.h>
 
-
-////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-#include <iostream>
-#include <thread>
-#include <vector>
-#include <queue>
-#include <mutex>
-#include <condition_variable>
-#include <functional>
-
-class ThreadPool {
-public:
-    ThreadPool(size_t numThreads) : stop(false), tasksCompleted(0) {
-        for (size_t i = 0; i < numThreads; ++i) {
-            workers.emplace_back(
-                [this] {
-                    for (;;) {
-                        std::function<void()> task;
-
-                        {
-                            std::unique_lock<std::mutex> lock(queue_mutex);
-                            condition.wait(lock,
-                                           [this] { return stop || !tasks.empty(); });
-
-                            if (stop && tasks.empty()) {
-                                return;
-                            }
-
-                            task = std::move(tasks.front());
-                            tasks.pop();
-                        }
-
-                        task();
-
-                        {
-                            std::lock_guard<std::mutex> lock(queue_mutex);
-                            ++tasksCompleted;
-                        }
-                        condition.notify_all();
-                    }
-                }
-            );
-        }
-    }
-
-    template<class F>
-    void enqueue(F&& f) {
-        {
-            std::unique_lock<std::mutex> lock(queue_mutex);
-            tasks.emplace(std::forward<F>(f));
-        }
-        condition.notify_one();
-    }
-
-    ~ThreadPool() {
-        {
-            std::unique_lock<std::mutex> lock(queue_mutex);
-            stop = true;
-        }
-        condition.notify_all();
-        for (std::thread& worker : workers) {
-            worker.join();
-        }
-    }
-
-    // 等待所有任务执行完毕
-// 等待所有任务执行完毕，并且等待所有线程执行完毕
-void wait() {
-    for (std::thread& worker : workers) {
-        if (worker.joinable()) {
-            worker.join();
-        }
-    }
-}
-
-private:
-    std::vector<std::thread> workers;
-    std::queue<std::function<void()>> tasks;
-
-    std::mutex queue_mutex;
-    std::condition_variable condition;
-    bool stop;
-    size_t tasksCompleted;
-};
-
-////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-
-
 using namespace std;
 using namespace NTL;
 
@@ -424,12 +330,6 @@ void MyMethods::NNover30() {
 	Scheme scheme(secretKey, logN, logQ);
 
 	////////////////////////////////////////////////////// SetNumThreads(1); //
-	ThreadPool pool(4);
-    std::mutex cout_mutex; // 用于保护 std::cout 的互斥锁
-
-
-
-
 
 	srand(time(NULL));
 
@@ -470,15 +370,9 @@ cout << mvec1[i] << "\t";
 	timeutils.start("Input > Layer1 ");
 	Ciphertext *CTs = new Ciphertext[hidden_units];
 
-
-
-    //#pragma omp parallel for
+    #pragma omp parallel for
 		for (long i = 0; i < hidden_units; ++i) {
-			pool.enqueue([i, &cout_mutex, &CTs, &cipher1, &NNdate, logp, &scheme] {
-            	std::lock_guard<std::mutex> lock(cout_mutex);
-
-
-            CTs[i].copy(cipher1);
+			CTs[i].copy(cipher1);
 
 			CTs[i] = scheme.multByConst(CTs[i], NNdate[0][i], logp);
 
@@ -507,20 +401,14 @@ cout << mvec1[i] << "\t";
 			ctx.free();
 			ctxx.free();
 
-
-
-
-       		});
-
-
 			cout << "Input > Layer1" << endl;
 
 		
 		//NTL_EXEC_RANGE_END
 	}
-pool.wait();
-	//timeutils.start("Decrypt batch");
-	auto dvec12 = scheme.decrypt(secretKey, CTs[0]);
+
+		//timeutils.start("Decrypt batch");
+	auto dvec12 = scheme.decrypt(secretKey, outputCTs[0]);
 	//timeutils.stop("Decrypt batch");
 
 	cout << endl << endl << endl << "SDFS:" << endl;
@@ -528,7 +416,7 @@ pool.wait();
 		cout << dvec12[i] << ",\t";
 	cout << endl << endl << endl;
 
-
+	exit(0);
 		timeutils.stop("Input > Layer1 ");
 // Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output	
 // Input > Layer1 > Layer2
@@ -560,14 +448,8 @@ pool.wait();
 
 	
     
-        //#pragma omp parallel for
+        #pragma omp parallel for
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-
-			        pool.enqueue([inputidx, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme, outputidx] {
-            std::lock_guard<std::mutex> lock(cout_mutex);
-            
-
-
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
 				tempCT.reScaleByAndEqual(logp);
 				if (outputCT.logp > tempCT.logp)
@@ -579,17 +461,12 @@ pool.wait();
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				//#pragma omp critical
+				#pragma omp critical
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
-
-        });
-
-
-
 		}
 
-pool.wait();
+
 		cout << "// Input > Layer1 > Layer2" << endl;
 
 
@@ -664,14 +541,8 @@ pool.wait();
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
-        //#pragma omp parallel for
+        #pragma omp parallel for
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-
-			        pool.enqueue([inputidx, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme, outputidx] {
-            std::lock_guard<std::mutex> lock(cout_mutex);
-            
-
-
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
 				tempCT.reScaleByAndEqual(logp);
 				if (outputCT.logp > tempCT.logp)
@@ -683,16 +554,11 @@ pool.wait();
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				//#pragma omp critical
+				#pragma omp critical
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
-
-        });
-
-
-
 		}
-		pool.wait();
+
 		cout << "// Input > Layer1 > Layer2 > Layer3" << endl;
 
 
@@ -769,14 +635,8 @@ pool.wait();
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
-        //#pragma omp parallel for
+        #pragma omp parallel for
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-
-			        pool.enqueue([inputidx, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme, outputidx] {
-            std::lock_guard<std::mutex> lock(cout_mutex);
-            
-
-
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
 				tempCT.reScaleByAndEqual(logp);
 				if (outputCT.logp > tempCT.logp)
@@ -788,16 +648,11 @@ pool.wait();
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				//#pragma omp critical
+				#pragma omp critical
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
-
-        });
-
-
-
 		}
-pool.wait();
+
 		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4" << endl;
 
 
@@ -871,14 +726,8 @@ pool.wait();
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
-        //#pragma omp parallel for
+        #pragma omp parallel for
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-
-			        pool.enqueue([inputidx, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme, outputidx] {
-            std::lock_guard<std::mutex> lock(cout_mutex);
-            
-
-
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
 				tempCT.reScaleByAndEqual(logp);
 				if (outputCT.logp > tempCT.logp)
@@ -890,17 +739,11 @@ pool.wait();
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				//#pragma omp critical
+				#pragma omp critical
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
-
-        });
-
-
-
-
 		}
-pool.wait();
+
 		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5" << endl;
 
 
@@ -974,14 +817,8 @@ pool.wait();
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
-        //#pragma omp parallel for
+        #pragma omp parallel for
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-
-			        pool.enqueue([inputidx, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme, outputidx] {
-            std::lock_guard<std::mutex> lock(cout_mutex);
-            
-
-
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
 				tempCT.reScaleByAndEqual(logp);
 				if (outputCT.logp > tempCT.logp)
@@ -993,17 +830,11 @@ pool.wait();
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				//#pragma omp critical
+				#pragma omp critical
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
-
-        });
-
-
-
-
 		}
-pool.wait();
+
 		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6" << endl;
 
 
@@ -1078,14 +909,8 @@ pool.wait();
 		auto outputCT = scheme.encrypt(mvec, slots, logp, logQ);
 		delete[] mvec;
 
-        //#pragma omp parallel for
+        #pragma omp parallel for
 		for (long inputidx = 0; inputidx < hidden_units; ++inputidx) {
-
-			        pool.enqueue([inputidx, &cout_mutex, &CTs, &wmatrix, logp, &outputCT, &scheme, outputidx] {
-            std::lock_guard<std::mutex> lock(cout_mutex);
-            
-
-
 				auto tempCT = scheme.multByConst(CTs[inputidx], wmatrix[inputidx][outputidx], logp);
 				tempCT.reScaleByAndEqual(logp);
 				if (outputCT.logp > tempCT.logp)
@@ -1097,17 +922,11 @@ pool.wait();
 				if (outputCT.logq < tempCT.logq)
 				tempCT.modDownToAndEqual(outputCT.logq);
 
-				//#pragma omp critical
+				#pragma omp critical
 				scheme.addAndEqual(outputCT, tempCT);
 				tempCT.free();
-
-        });
-
-
-
-
 		}
-pool.wait();
+
 		cout << "// Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7" << endl;
 
 
@@ -1160,10 +979,8 @@ pool.wait();
 	auto resultCT = scheme.encrypt(mres, slots, outputCTs[0].logp,
 			outputCTs[0].logq);
 
-	//#pragma omp parallel for
+	#pragma omp parallel for
 	for (long i = 0; i < hidden_units; ++i) {
-        pool.enqueue([i, &cout_mutex, &outputCTs, &NNdate, logp, &resultCT, &scheme] {
-            std::lock_guard<std::mutex> lock(cout_mutex);
 
 		outputCTs[i] = scheme.multByConst(outputCTs[i], NNdate[35][i], logp);
 
@@ -1178,17 +995,10 @@ pool.wait();
 		if (resultCT.logq < outputCTs[i].logq)
 			outputCTs[i].modDownToAndEqual(resultCT.logq);
 
-		//#pragma omp critical
+		#pragma omp critical
 		scheme.addAndEqual(resultCT, outputCTs[i]);
 
-
-
-        });
-
-
-
 	}
-	pool.wait();
 	scheme.addConstAndEqual(resultCT, NNdate[36][0]);
 	timeutils.stop("Input > Layer1 > Layer2 > Layer3 > Layer4 > Layer5 > Layer6 > Layer7 > Output ");
 	totaltime.stop("The Total Time Consumed");
