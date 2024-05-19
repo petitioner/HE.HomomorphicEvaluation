@@ -4,17 +4,17 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/MyHomomorphicComparison.cpp \
+../src/MyHomomorphicEvaluation.cpp \
 ../src/MyMethods.cpp \
 ../src/MyTools.cpp 
 
 OBJS += \
-./src/MyHomomorphicComparison.o \
+./src/MyHomomorphicEvaluation.o \
 ./src/MyMethods.o \
 ./src/MyTools.o 
 
 CPP_DEPS += \
-./src/MyHomomorphicComparison.d \
+./src/MyHomomorphicEvaluation.d \
 ./src/MyMethods.d \
 ./src/MyTools.d 
 
