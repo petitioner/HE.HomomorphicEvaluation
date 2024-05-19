@@ -41,19 +41,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: MyHomomorphicComparison
+all: MyHomomorphicEvaluation
 
 # Tool invocations
-MyHomomorphicComparison: $(OBJS) $(USER_OBJS)
+MyHomomorphicEvaluation: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L"/home/sunly/Downloads/HomomorphicComparison-master/HomomorphicComparison/lib/lib" -L"/home/sunly/Downloads/HomomorphicComparison-master/HomomorphicComparison/HEAAN/HEAAN/lib" -pthread -o "MyHomomorphicComparison" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L"/home/sunly/Downloads/HomomorphicEvaluation-master/HomomorphicEvaluation/lib/lib" -L"/home/sunly/Downloads/HomomorphicEvaluation-master/HomomorphicEvaluation/HEAAN/HEAAN/lib" -pthread -o "MyHomomorphicEvaluation" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(CC_DEPS)$(C++_DEPS)$(EXECUTABLES)$(C_UPPER_DEPS)$(CXX_DEPS)$(OBJS)$(CPP_DEPS)$(C_DEPS) MyHomomorphicComparison
+	-$(RM) $(CC_DEPS)$(C++_DEPS)$(EXECUTABLES)$(C_UPPER_DEPS)$(CXX_DEPS)$(OBJS)$(CPP_DEPS)$(C_DEPS) MyHomomorphicEvaluation
 	-@echo ' '
 
 .PHONY: all clean dependents
