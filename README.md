@@ -34,7 +34,7 @@
 
 # 可以使用NN來找最佳多項式 畢竟NN矩陣乘法多項式激活函數的結果就是多項式
 
-# HE.HomomorphicComparison
+# HE.HomomorphicEvaluation
 
 ```cpp
 root@vultr:~# cd ..
@@ -43,29 +43,29 @@ root@vultr:/home# mkdir sunly
 root@vultr:/home# cd sunly/
 root@vultr:/home/sunly# mkdir Downloads
 root@vultr:/home/sunly# cd Downloads/
-root@vultr:/home/sunly/Downloads# git clone https://github.com/petitioner/HE.HomomorphicComparison
-Cloning into 'HE.HomomorphicComparison'...
+root@vultr:/home/sunly/Downloads# git clone https://github.com/petitioner/HE.HomomorphicEvaluation
+Cloning into 'HE.HomomorphicEvaluation'...
 remote: Enumerating objects: 397, done.
 remote: Counting objects: 100% (11/11), done.
 remote: Compressing objects: 100% (11/11), done.
 remote: Total 397 (delta 0), reused 9 (delta 0), pack-reused 386
 Receiving objects: 100% (397/397), 23.51 MiB | 43.92 MiB/s, done.
 Resolving deltas: 100% (123/123), done.
-root@vultr:/home/sunly/Downloads# mv HE.HomomorphicComparison/ HomomorphicComparison-master
-root@vultr:/home/sunly/Downloads# cd HomomorphicComparison-master/HomomorphicComparison/lib/lib/
-root@vultr:/home/sunly/Downloads/HomomorphicComparison-master/HomomorphicComparison/lib/lib# ls
+root@vultr:/home/sunly/Downloads# mv HE.HomomorphicEvaluation/ HomomorphicEvaluation-master
+root@vultr:/home/sunly/Downloads# cd HomomorphicEvaluation-master/HomomorphicEvaluation/lib/lib/
+root@vultr:/home/sunly/Downloads/HomomorphicEvaluation-master/HomomorphicEvaluation/lib/lib# ls
 libgmp.a  libgmpxx.a  libntl.a.zip  README.md
-root@vultr:/home/sunly/Downloads/HomomorphicComparison-master/HomomorphicComparison/lib/lib# unzip libntl.a.zip 
+root@vultr:/home/sunly/Downloads/HomomorphicEvaluation-master/HomomorphicEvaluation/lib/lib# unzip libntl.a.zip 
 Archive:  libntl.a.zip
   inflating: libntl.a                
-root@vultr:/home/sunly/Downloads/HomomorphicComparison-master/HomomorphicComparison/lib/lib# cd ..
-root@vultr:/home/sunly/Downloads/HomomorphicComparison-master/HomomorphicComparison/lib# cd ..
-root@vultr:/home/sunly/Downloads/HomomorphicComparison-master/HomomorphicComparison# cd Default/
-root@vultr:/home/sunly/Downloads/HomomorphicComparison-master/HomomorphicComparison/Default# make clean && make all
+root@vultr:/home/sunly/Downloads/HomomorphicEvaluation-master/HomomorphicEvaluation/lib/lib# cd ..
+root@vultr:/home/sunly/Downloads/HomomorphicEvaluation-master/HomomorphicEvaluation/lib# cd ..
+root@vultr:/home/sunly/Downloads/HomomorphicEvaluation-master/HomomorphicEvaluation# cd Default/
+root@vultr:/home/sunly/Downloads/HomomorphicEvaluation-master/HomomorphicEvaluation/Default# make clean && make all
 
-Finished building target: MyHomomorphicComparison
+Finished building target: MyHomomorphicEvaluation
  
-root@vultr:/home/sunly/Downloads/HomomorphicComparison-master/HomomorphicComparison/Default# ./MyHomomorphicComparison 
+root@vultr:/home/sunly/Downloads/HomomorphicEvaluation-master/HomomorphicEvaluation/Default# ./MyHomomorphicEvaluation 
 !!! START TEST BASIC !!!
 !!! START TEST BASIC !!!
 
@@ -616,6 +616,6 @@ ctres.logq = 840
 
 
 END OF THE PROGRAMM
-root@vultr:/home/sunly/Downloads/HomomorphicComparison-master/HomomorphicComparison/Default# 
+root@vultr:/home/sunly/Downloads/HomomorphicEvaluation-master/HomomorphicEvaluation/Default# 
 
 ```
