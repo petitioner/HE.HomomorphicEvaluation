@@ -1,3 +1,6 @@
+# 神經網絡模型可以用來擬合多元函數，比如CNN中池化層的max pooling[輸入四個浮點數輸出其中最大值] 或者 F(x, y) = sinx + cosy; 其他方法就比較難以近似擬合多元函數
+
+
 # scheme.addAndEqual(outputCT, tempCTs[inputidx]);
    
 ```cpp
